@@ -8,11 +8,11 @@ let homes = [];
 let hospitalMarkers = new Map(); // Store unique hospitals by place_id
 
 async function initMap() {
-    const defaultLocation = { lat: 39.952305, lng: -75.193703 }; // Philadelphia
+    const center = { lat: 39.952305, lng: -75.193703 }; // Philadelphia
 
     map = new google.maps.Map(document.getElementById("map"), {
         zoom: 15,
-        center: defaultLocation,
+        center: center,
         mapId: "e442d3b4191ab219",
     });
     const service = new google.maps.places.PlacesService(map);
@@ -117,75 +117,157 @@ function isValidHospital(place) {
 // }
 
 function updateLocation() {
-    fetch('http://[::]:8000/tick', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-    })
-    .then(response => console.log('got response'))
-    .catch(error => console.error("Error running simulation:", error));
-    // const address = document.getElementById("locationInput").value;
-    // const geocoder = new google.maps.Geocoder();
+    const address = document.getElementById("locationInput").value;
+    const geocoder = new google.maps.Geocoder();
 
-    // geocoder.geocode({ address: address }, (results, status) => {
-    //     if (status === "OK") {
-    //         const location = results[0].geometry.location;
-    //         map.setCenter(location);
-    //         map.setZoom(15);
-    //     } else {
-    //         alert("Location not found: " + status);
-    //     }
-    // });
+    geocoder.geocode({ address: address }, (results, status) => {
+        if (status === "OK") {
+            const location = results[0].geometry.location;
+            map.setCenter(location);
+            map.setZoom(15);
+        } else {
+            alert("Location not found: " + status);
+        }
+    });
 }
 
 
-function drawBoundingBox() {
-    const verticalKm = parseFloat(document.getElementById("verticalDistance").value) || 0;
-    const horizontalKm = parseFloat(document.getElementById("horizontalDistance").value) || 0;
+    function drawPeople() {
+        fetch('http://[::]:8000/tick', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Simulation data:', data);
+    
+            data.building_counts.forEach(building => {
+                if (hospitalMarkers.has(building.id)) {
+                    const hospitalLocation = hospitalMarkers.get(building.id);
+                    placeSusceptibleDots(hospitalLocation, building.S);
+                    placeInfectedDots(hospitalLocation, building.R);
+                    placeRecoveredDots(hospitalLocation, building.R);
 
-    if (verticalKm === 0 || horizontalKm === 0) {
-        alert("Please enter valid distances.");
-        return;
+                }
+            });
+        })
+        .catch(error => console.error("Error running simulation:", error));
+    }
+    
+    function placeSusceptibleDots(center, count) {
+        const radius = 0.0003;  // Approx 30 meters, adjust as needed
+        for (let i = 0; i < count; i++) {
+            const randomLat = center.lat() + (Math.random() * 2 - 1) * radius;
+            const randomLng = center.lng() + (Math.random() * 2 - 1) * radius;
+    
+            new google.maps.Marker({
+                position: { lat: randomLat, lng: randomLng },
+                map: map,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 4,
+                    fillColor: 'yellow',
+                    fillOpacity: 0.8,
+                    strokeWeight: 0,
+                }
+            });
+        }
+    }
+    function placeRecoveredDots(center, count) {
+        const radius = 0.0003;  // Approx 30 meters, adjust as needed
+        for (let i = 0; i < count; i++) {
+            const randomLat = center.lat() + (Math.random() * 2 - 1) * radius;
+            const randomLng = center.lng() + (Math.random() * 2 - 1) * radius;
+    
+            new google.maps.Marker({
+                position: { lat: randomLat, lng: randomLng },
+                map: map,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 4,
+                    fillColor: 'blue',
+                    fillOpacity: 0.8,
+                    strokeWeight: 0,
+                }
+            });
+        }
+    }
+    function placeInfectedDots(center, count) {
+        const radius = 0.0003;  // Approx 30 meters, adjust as needed
+        for (let i = 0; i < count; i++) {
+            const randomLat = center.lat() + (Math.random() * 2 - 1) * radius;
+            const randomLng = center.lng() + (Math.random() * 2 - 1) * radius;
+    
+            new google.maps.Marker({
+                position: { lat: randomLat, lng: randomLng },
+                map: map,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 4,
+                    fillColor: 'red',
+                    fillOpacity: 0.8,
+                    strokeWeight: 0,
+                }
+            });
+        }
     }
 
-    // Conversion factors: 1 km ≈ 0.009 degrees latitude, 1 km ≈ 0.0113 degrees longitude
-    const kmToLat = 0.009;
-    const kmToLng = 0.0113;
 
-    const currentCenter = map.getCenter();
-    const latCenter = currentCenter.lat();
-    const lngCenter = currentCenter.lng();
+    let currentRectangle = null;
 
-    // Calculate the rectangle bounds based on the distances in kilometers
-    const northLat = latCenter + (verticalKm / 2) * kmToLat;
-    const southLat = latCenter - (verticalKm / 2) * kmToLat;
-    const eastLng = lngCenter + (horizontalKm / 2) * kmToLng;
-    const westLng = lngCenter - (horizontalKm / 2) * kmToLng;
-
-    // Define rectangle bounds
-    const bounds = {
-        north: northLat,
-        south: southLat,
-        east: eastLng,
-        west: westLng
-    };
-
-    // Draw the rectangle on the map
-    const rectangle = new google.maps.Rectangle({
-        bounds: bounds,
-        editable: true,
-        draggable: true,
-        strokeColor: "#FF0000",
-        strokeOpacity: 0.8,
-        strokeWeight: 2,
-        fillColor: "#FF0000",
-        fillOpacity: 0,
-        map: map
-    });
-
-    map.fitBounds(bounds);
-}
+    function drawBoundingBox() {
+        const verticalKm = parseFloat(document.getElementById("verticalDistance").value) || 0;
+        const horizontalKm = parseFloat(document.getElementById("horizontalDistance").value) || 0;
+    
+        if (verticalKm === 0 || horizontalKm === 0) {
+            alert("Please enter valid distances.");
+            return;
+        }
+    
+        // Remove existing rectangle if present
+        if (currentRectangle) {
+            currentRectangle.setMap(null);
+        }
+    
+        // Conversion factors: 1 km ≈ 0.009 degrees latitude, 1 km ≈ 0.0113 degrees longitude
+        const kmToLat = 0.009;
+        const kmToLng = 0.0113;
+    
+        const currentCenter = map.getCenter();
+        const latCenter = currentCenter.lat();
+        const lngCenter = currentCenter.lng();
+    
+        // Calculate the rectangle bounds based on the distances in kilometers
+        const northLat = latCenter + (verticalKm / 2) * kmToLat;
+        const southLat = latCenter - (verticalKm / 2) * kmToLat;
+        const eastLng = lngCenter + (horizontalKm / 2) * kmToLng;
+        const westLng = lngCenter - (horizontalKm / 2) * kmToLng;
+    
+        // Define rectangle bounds
+        const bounds = {
+            north: northLat,
+            south: southLat,
+            east: eastLng,
+            west: westLng
+        };
+    
+        // Draw the rectangle on the map (non-editable and non-draggable)
+        currentRectangle = new google.maps.Rectangle({
+            bounds: bounds,
+            editable: false,  // Prevent dragging/resizing
+            draggable: false, // Prevent movement
+            strokeColor: "#FF0000",
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: "#FF0000",
+            fillOpacity: 0,
+            map: map
+        });
+    
+        map.fitBounds(bounds);
+    }    
 
 // handler (user-input) functions (empty for now - to add backend updates)
 
