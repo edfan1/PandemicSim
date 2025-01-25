@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
-from simulation.city import City
-
+from city import City
 
 city = City()
 
