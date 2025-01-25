@@ -127,12 +127,65 @@ function updateLocation() {
             const location = results[0].geometry.location;
             map.setCenter(location);
             map.setZoom(15);
+            searchNearbyPlaces(location);
         } else {
             alert("Location not found: " + status);
         }
     });
 }
 
+let allResults = {
+    hospitals: [],
+    restaurants: [],
+    schools: [],
+    offices: [],
+    stores: []
+};
+
+function searchNearbyPlaces(bounds) {
+    const service = new google.maps.places.PlacesService(map);
+    const types = ['hospital', 'restaurant', 'school', 'office', 'store'];
+
+    types.forEach(type => {
+        allResults[type + 's'] = []; // Reset results for each type
+        const request = {
+            bounds: bounds,  // Search within the drawn box
+            type: type
+        };
+        
+        getAllPlaces(service, request, type);
+    });
+}
+
+function getAllPlaces(service, request, type, resultsArray = []) {
+    service.nearbySearch(request, (results, status, pagination) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+            results.forEach(place => {
+                if (!place.types.includes('doctor')) {  // Exclude unwanted types
+                    resultsArray.push({
+                        name: place.name,
+                        type: place.types,
+                        latitude: place.geometry.location.lat(),
+                        longitude: place.geometry.location.lng()
+                    });
+                }
+            });
+
+            // If there are more pages, fetch the next page recursively
+            if (pagination && pagination.hasNextPage) {
+                setTimeout(() => {
+                    pagination.nextPage();
+                }, 2000);  // Delay to avoid hitting API limits
+            } else {
+                // Store the final results once all pages are retrieved
+                allResults[type + 's'] = resultsArray;
+                console.log(`All ${type}s found within the box:`, resultsArray);
+            }
+        } else {
+            console.error(`Error fetching places for ${type}:`, status);
+        }
+    });
+}
 
     function drawPeople() {
         fetch('http://[::]:8000/tick', {
@@ -269,6 +322,8 @@ function updateLocation() {
         });
     
         map.fitBounds(bounds);
+        searchNearbyPlaces(bounds);
+
     }    
 
 // handler (user-input) functions (empty for now - to add backend updates)
