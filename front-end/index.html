@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Maps with Inputs</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="map"></div>
+
+    <div id="controls">
+        <h3>City Statistics</h3>
+        <label>
+            <input type="checkbox" id="maskMandate"> Mask Mandate
+        </label>
+        <label>
+            <input type="checkbox" id="schoolsClosed"> Schools Closed
+        </label>
+        <label>
+            <input type="checkbox" id="workFromHome"> Work from Home
+        </label>
+        <label>
+            <input type="checkbox" id="lockdown"> Lockdown
+        </label>
+        
+        <h3>Average Hospital Data</h3>
+        <label>
+            Average Percentage of Infected Patients:
+            <input type="number" id="numNotSick" min="0">
+        </label>
+        <label>
+            Average Number of Patients Per Hospital:
+            <input type="number" id="numTotal" min="0">
+        </label>
+
+        <button onclick="applySettings()">Apply</button>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
