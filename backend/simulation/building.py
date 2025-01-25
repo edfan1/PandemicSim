@@ -1,5 +1,5 @@
 class Building:
-    def __init__(self, name, capacity, max_employees, type='building', id = None, infection_rate = 0.1):
+    def __init__(self, name, id, capacity = 200, max_employees = 100,type='building', infection_rate = 0.1):
         self.type = type
         self.name = name
         self.capacity = capacity
@@ -60,4 +60,4 @@ class Building:
         self.name = new_name
 
     def __str__(self):
-        return f"Building(name={self.name}, type={self.type}, size={self.size}, sus={self.sus}, inf={self.inf}, rec={self.rec}, occcupants={len(self.occupants)}, employees={len(self.employees)})"
+        return f"Building(name={self.name}, id={self.id}, type={self.type}, size={self.size}, sus={self.sus}, inf={self.inf}, rec={self.rec}, occcupants={len(self.occupants)}, employees={len(self.employees)})"

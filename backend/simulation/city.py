@@ -57,17 +57,17 @@ class City:
             leisure = random.choice(self.city[random.choice(leisures)])
         return leisure
 
-    def construct_building(self, building_type):
+    def construct_building(self, building_type, id):
         building_params = building_construct[building_type]
-        self.city[building_type].append(Building(building_params['name'], building_params['capacity'], building_params['staff'], building_params['type'], building_params['infection_rate']))
+        self.city[building_type].append(Building(building_params['name'], id, capacity=building_params['capacity'], max_employees=building_params['staff'], type=building_params['type'], infection_rate=building_params['infection_rate']))
 
     def construct_person(self, person_type):
         person_params = person_construct[person_type]
         return Person(person_params['name'], person_params['age'], person_params['occupation'])
 
-    def add_home(self, adults = 2, children = 2):
+    def add_home(self, id, adults = 2, children = 2):
         home_params = building_construct['home']
-        home = Building(home_params['name'], home_params['capacity'], home_params['staff'], home_params['type'], home_params['infection_rate'])
+        home = Building(home_params['name'], id, capacity=home_params['capacity'], max_employees=home_params['staff'], type=home_params['type'], infection_rate=home_params['infection_rate'])
         for i in range(adults):
             person = self.construct_person('worker')
             person.home = home
