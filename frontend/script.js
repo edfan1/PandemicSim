@@ -20,6 +20,51 @@ async function initMap() {
     });
 }
 
+async function getBuildingData() {
+    const bounds = map.getBounds();
+    if (!bounds) return;
+
+    const service = new google.maps.places.PlacesService(map);
+    const request = {
+        bounds: bounds,
+        type: "building",
+        keyword: "building"
+    };
+
+    service.nearbySearch(request, async (results, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+            const buildings = results.map((place) => ({
+                place_id: place.place_id,
+                name: place.name,
+                types: place.types,
+            }));
+
+            await sendBuildingDataToBackend(buildings);
+        }
+    });
+}
+
+async function sendBuildingDataToBackend(buildings) {
+    try {
+        const response = await fetch('http://0.0.0.0:8000/load_buildings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(buildings)
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        console.log('Data sent to backend successfully:', data);
+    } catch (error) {
+        console.error('Error sending data to backend:', error);
+    }
+}
+
 function findHospitals() {
     const bounds = map.getBounds();
     if (!bounds) return;
