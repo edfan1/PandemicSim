@@ -1,5 +1,10 @@
 let map;
-let buildings = [];
+let hospitals = [];
+let restaurants = [];
+let schools = [];
+let offices = [];
+let stores = [];
+let homes = [];
 let hospitalMarkers = new Map(); // Store unique hospitals by place_id
 
 async function initMap() {
@@ -11,25 +16,35 @@ async function initMap() {
         mapId: "e442d3b4191ab219",
     });
     const service = new google.maps.places.PlacesService(map);
-    const request = {
-        location: map.getCenter(),
-        radius: 500, // Search within 500 meters
-        type: ['establishment'] // Fetch all types of establishments
-    };
+    const types = ['hospital', 'restaurant', 'school', 'office', 'store'];
 
-    service.nearbySearch(request, (results, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK) {
-            buildings = results.map(place => ({
-                name: place.name,
-                type: place.types,
-                latitude: place.geometry.location.lat(),
-                longitude: place.geometry.location.lng()
-            }));
-            console.log("Buildings fetched:", buildings);
-        } else {
-            console.error("Error fetching places:", status);
-        }
+    types.forEach(type => {
+        const request = {
+            location: map.getCenter(),
+            radius: 5000,
+            type: type 
+        };
+
+        service.nearbySearch(request, (results, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                const filteredResults = results.filter(place => 
+                    place.types.includes(type) && !place.types.includes('doctor')
+                );
+
+                const filteredBuildings = filteredResults.map(place => ({
+                    name: place.name,
+                    type: place.types,
+                    latitude: place.geometry.location.lat(),
+                    longitude: place.geometry.location.lng()
+                }));
+
+                console.log(`Results for ${type}:`, filteredBuildings);
+            } else {
+                console.error(`Error fetching places for ${type}:`, status);
+            }
+        });
     });
+
     alert("Map Init!");
 }
 
@@ -296,6 +311,7 @@ document.getElementById("lockdown").addEventListener("change", handleLockdown);
 
 
 // Load Google Maps API with Places and Geometry libraries
+const GOOGLE_MAPS_API_KEY = "AIzaSyDc1RJKVZuU0tqeZcW4q558ltBa7W857fA";
 const script = document.createElement('script');
 script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY }&libraries=places,geometry&loading=async&callback=initMap`;
 script.async = true;
