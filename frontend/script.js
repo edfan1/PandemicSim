@@ -164,6 +164,47 @@ function drawBoundingBox() {
     map.fitBounds(bounds);
 }
 
+// handler (user-input) functions (empty for now - to add backend updates)
+
+function handleCityPopulation() {
+    const cityPopulation = parseInt(document.getElementById("cityPopulation").value, 10);
+    console.log("City Population:", cityPopulation);
+}
+
+function handleInfectionRate() {
+    const infectionRate = parseFloat(document.getElementById("infectionRate").value);
+    console.log("Infection Rate:", infectionRate);
+}
+
+function handleMaskMandate() {
+    const maskMandate = document.getElementById("maskMandate").checked;
+    console.log("Mask Mandate:", maskMandate);
+}
+
+function handleSchoolsClosed() {
+    const schoolsClosed = document.getElementById("schoolsClosed").checked;
+    console.log("Schools Closed:", schoolsClosed);
+}
+
+function handleWorkFromHome() {
+    const workFromHome = document.getElementById("workFromHome").checked;
+    console.log("Work From Home:", workFromHome);
+}
+
+function handleLockdown() {
+    const lockdown = document.getElementById("lockdown").checked;
+    console.log("Lockdown:", lockdown);
+}
+
+document.getElementById("cityPopulation").addEventListener("input", handleCityPopulation);
+document.getElementById("infectionRate").addEventListener("input", handleInfectionRate);
+document.getElementById("maskMandate").addEventListener("change", handleMaskMandate);
+document.getElementById("schoolsClosed").addEventListener("change", handleSchoolsClosed);
+document.getElementById("workFromHome").addEventListener("change", handleWorkFromHome);
+document.getElementById("lockdown").addEventListener("change", handleLockdown);
+
+
+
 // Load Google Maps API with Places and Geometry libraries
 const script = document.createElement('script');
 script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY }&libraries=places,geometry&loading=async&callback=initMap`;
