@@ -1,4 +1,5 @@
 let map;
+let buildings = [];
 let hospitalMarkers = new Map(); // Store unique hospitals by place_id
 
 async function initMap() {
@@ -9,60 +10,46 @@ async function initMap() {
         center: defaultLocation,
         mapId: "e442d3b4191ab219",
     });
-
-    await google.maps.importLibrary("marker");
-
-    findHospitals();
-
-    map.addListener('idle', () => {
-        // clearMarkers();
-        findHospitals();
-    });
-}
-
-async function getBuildingData() {
-    const bounds = map.getBounds();
-    if (!bounds) return;
-
     const service = new google.maps.places.PlacesService(map);
     const request = {
-        bounds: bounds,
-        type: "building",
-        keyword: "building"
+        location: map.getCenter(),
+        radius: 500, // Search within 500 meters
+        type: ['establishment'] // Fetch all types of establishments
     };
 
-    service.nearbySearch(request, async (results, status) => {
+    service.nearbySearch(request, (results, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK) {
-            const buildings = results.map((place) => ({
-                place_id: place.place_id,
+            buildings = results.map(place => ({
                 name: place.name,
-                types: place.types,
+                type: place.types,
+                latitude: place.geometry.location.lat(),
+                longitude: place.geometry.location.lng()
             }));
-
-            await sendBuildingDataToBackend(buildings);
+            console.log("Buildings fetched:", buildings);
+        } else {
+            console.error("Error fetching places:", status);
         }
     });
+    alert("Map Init!");
 }
 
-async function sendBuildingDataToBackend(buildings) {
-    try {
-        const response = await fetch('http://0.0.0.0:8000/load_buildings', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(buildings)
-        });
-
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-
-        const data = await response.json();
-        console.log('Data sent to backend successfully:', data);
-    } catch (error) {
-        console.error('Error sending data to backend:', error);
+function startSimulation() {
+    if (buildings.length === 0) {
+        alert("No building data available!");
+        return;
     }
+    fetch('http://[::]:8000/run-simulation', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(buildings)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Simulation result:", data);
+    })
+    .catch(error => console.error("Error running simulation:", error));
 }
 
 function findHospitals() {
