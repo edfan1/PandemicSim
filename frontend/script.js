@@ -75,7 +75,7 @@ function findHospitals() {
 }
 
 // Function to verify that the result is actually a hospital
-function isValidHospital(place) {
+function isValidHospital(place) { 
     const validTypes = ["hospital", "health"];
     return place.name.toLowerCase().includes("hospital") && place.types.some(type => validTypes.includes(type));
 }
