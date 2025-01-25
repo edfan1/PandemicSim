@@ -26,7 +26,18 @@
         </label>
         <button onclick="drawBoundingBox()">Set City Bounds</button>
         <div style="height: 15px;"></div>
-        
+        <h3>Simulation</h3>
+<label>
+    City Population:
+    <input type="number" id="cityPopulation" min="1" placeholder="Enter population">
+</label>
+<label>
+    Infection Rate:
+    <input type="decimal" id="infectionRate" min=".001" placeholder="Enter rate">
+</label>
+<button onclick="startSimulation()">Start Simulation</button>
+<div style="height: 15px;"></div>
+
         <h3>City Statistics</h3>
         <label>
             <input type="checkbox" id="maskMandate"> Mask Mandate
