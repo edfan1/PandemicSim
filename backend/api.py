@@ -19,3 +19,7 @@ async def run_simulation(buildings: List[Building]):
 
     # Return the simulation results
     return "hello"
+
+@router.post("/tick")
+async def tick():
+    return {'time': update_city(), 'building_counts': get_building_counts()}

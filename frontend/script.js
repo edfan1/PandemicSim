@@ -102,18 +102,26 @@ function isValidHospital(place) {
 // }
 
 function updateLocation() {
-    const address = document.getElementById("locationInput").value;
-    const geocoder = new google.maps.Geocoder();
+    fetch('http://[::]:8000/tick', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(response => console.log('got response'))
+    .catch(error => console.error("Error running simulation:", error));
+    // const address = document.getElementById("locationInput").value;
+    // const geocoder = new google.maps.Geocoder();
 
-    geocoder.geocode({ address: address }, (results, status) => {
-        if (status === "OK") {
-            const location = results[0].geometry.location;
-            map.setCenter(location);
-            map.setZoom(15);
-        } else {
-            alert("Location not found: " + status);
-        }
-    });
+    // geocoder.geocode({ address: address }, (results, status) => {
+    //     if (status === "OK") {
+    //         const location = results[0].geometry.location;
+    //         map.setCenter(location);
+    //         map.setZoom(15);
+    //     } else {
+    //         alert("Location not found: " + status);
+    //     }
+    // });
 }
 
 
