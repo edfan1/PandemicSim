@@ -229,7 +229,6 @@ document.getElementById("lockdown").addEventListener("change", handleLockdown);
 
 
 // Load Google Maps API with Places and Geometry libraries
-const GOOGLE_MAPS_API_KEY = "AIzaSyDc1RJKVZuU0tqeZcW4q558ltBa7W857fA";
 const script = document.createElement('script');
 script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY }&libraries=places,geometry&loading=async&callback=initMap`;
 script.async = true;
