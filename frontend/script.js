@@ -1,10 +1,12 @@
 let map;
-let hospitals = [];
-let restaurants = [];
-let schools = [];
-let offices = [];
-let stores = [];
-let homes = [];
+let buildings = {
+    "hospital": [],
+    "restaurant": [],
+    "school": [],
+    "office": [],
+    "store": [],
+    "home": []
+};
 let hospitalMarkers = new Map(); // Store unique hospitals by place_id
 
 async function initMap() {
@@ -30,20 +32,20 @@ async function initMap() {
                 const filteredResults = results.filter(place => 
                     place.types.includes(type) && !place.types.includes('doctor')
                 );
-
                 const filteredBuildings = filteredResults.map(place => ({
                     name: place.name,
-                    type: place.types,
-                    latitude: place.geometry.location.lat(),
-                    longitude: place.geometry.location.lng()
+                    building_id: place.place_id,
+                    types: place.types,
                 }));
 
                 console.log(`Results for ${type}:`, filteredBuildings);
+                buildings[type] = filteredBuildings;
             } else {
                 console.error(`Error fetching places for ${type}:`, status);
             }
         });
     });
+    console.log("All buildings:", buildings);
 
     alert("Map Init!");
 }
