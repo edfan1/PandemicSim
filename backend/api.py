@@ -1,20 +1,18 @@
+
 from fastapi import APIRouter, HTTPException
 from typing import List
-from .models import BuildInfo
+from models import *
 
 router = APIRouter()
 
-buildings = []
+# Endpoint to receive building data and run the simulation
+@router.post("/run-simulation", response_model=str)
+async def run_simulation(buildings: List[Building]):
+    if not buildings:
+        raise HTTPException(status_code=400, detail="No building data provided")
 
-@router.post("/load_buildings")
-async def load_buildings(building_data: List[BuildInfo]):
-    try:
-        for building in building_data:
-            buildings.append(building)
-        return {"message": "Buildings loaded successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    # Example simulation: Mark some buildings as infected
+    print("hello")
 
-@router.get("/buildings")
-async def get_buildings():
-    return buildings
+    # Return the simulation results
+    return "hello"

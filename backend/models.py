@@ -1,7 +1,9 @@
 from pydantic import BaseModel
 from typing import List
 
-class BuildInfo(BaseModel):
-    id: str
+# Define a Pydantic model for incoming building data
+class Building(BaseModel):
     name: str
-    types: List[str]
+    type: List[str]  # Google Maps types (e.g., ["restaurant", "hospital"])
+    latitude: float
+    longitude: float
