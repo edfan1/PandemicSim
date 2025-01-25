@@ -3,13 +3,13 @@ from city import City
 
 city = City()
 
-city.construct_building('hospital')
-city.construct_building('restaurant')
-city.construct_building('school')
-city.construct_building('office')
-city.construct_building('store')
+city.construct_building('hospital', 1)
+city.construct_building('restaurant', 1)
+city.construct_building('school', 1)
+city.construct_building('office', 1)
+city.construct_building('store', 1)
 for i in range(30):
-    city.add_home()
+    city.add_home(id=i)
 
 susceptible_counts = []
 infected_counts = []
@@ -17,7 +17,7 @@ recovered_counts = []
 
 city.inject_patient_zero()
 
-for i in range(100):
+for i in range(50):
     for i in range(24):
         city.update_city()
         counts = city.get_counts()
