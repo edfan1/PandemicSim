@@ -61,6 +61,10 @@ class City:
         building_params = building_construct[building_type]
         self.city[building_type].append(Building(building_params['name'], id, capacity=building_params['capacity'], max_employees=building_params['staff'], type=building_params['type'], infection_rate=building_params['infection_rate']))
 
+    def construct_hospital(self, id, numBeds, numWorkers):
+        building_params = building_construct['hospital']
+        self.city['hospital'].append(Building(building_params['name'], id, capacity=numBeds, max_employees=numWorkers, type=building_params['type'], infection_rate=building_params['infection_rate']))
+
     def construct_person(self, person_type):
         person_params = person_construct[person_type]
         return Person(person_params['name'], person_params['age'], person_params['occupation'])

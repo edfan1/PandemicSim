@@ -1,19 +1,32 @@
 import matplotlib.pyplot as plt
 from simulation.city import City
-from api import Hospitals
+
 
 city = City()
 
-for i in range (Hospitals):
-    city.construct_building('hospital', 1)
+def construct_hospitals(num, avgBeds, avgWorkers):
+    for i in range(num):
+        city.construct_hospital(1, avgBeds, avgWorkers)
 
-city.construct_building('restaurant', 1)
-city.construct_building('school', 1)
-city.construct_building('office', 1)
-city.construct_building('store', 1)
+def construct_restaurants(x):
+    for i in range(x):
+        city.construct_building('restaurant', 1)
 
-for i in range(30):
-    city.add_home(id=i)
+def construct_schools(x):
+    for i in range(x):
+        city.construct_building('school', 1)
+
+def construct_offices(x):
+    for i in range(x):
+        city.construct_building('office', 1)
+
+def construct_stores(x):
+    for i in range(x):
+        city.construct_building('store', 1)
+
+def add_homes(x):
+    for i in range(x):
+        city.add_home(id=i)
 
 susceptible_counts = []
 infected_counts = []
