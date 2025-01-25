@@ -1,5 +1,5 @@
 class Building:
-    def __init__(self, name, capacity, max_employees, type='building', infection_rate = 0.1):
+    def __init__(self, name, capacity, max_employees, type='building', id = None, infection_rate = 0.1):
         self.type = type
         self.name = name
         self.capacity = capacity
@@ -11,6 +11,7 @@ class Building:
         self.infection_rate = infection_rate
         self.occupants = []
         self.employees = []
+        self.id = id
     
     def add_employee(self, person):
         if len(self.employees) == self.max_employees:
