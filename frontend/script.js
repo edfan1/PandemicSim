@@ -24,42 +24,55 @@ async function initMap() {
     alert("Map Init!");
 }
 
+const indexedPlaces = new Set();
+
 function findNearby() {
+    indexedPlaces.clear();
     const service = new google.maps.places.PlacesService(map);
     const types = ['hospital', 'restaurant', 'school', 'office', 'store', 'home'];
-    const indexedPlaces = new Map();
     types.forEach(type => {
         const request = {
             bounds: bounds,
             type: type 
         };
         if (type === 'home') {
-            request.type = 'apartment or residential';
+            request.keyword = 'apartment complex';
         }
-        service.nearbySearch(request, (results, status) => {
-            if (status === google.maps.places.PlacesServiceStatus.OK) {
-                const filteredResults = results.filter(place => {
-                    if (place.types.includes('doctor') || indexedPlaces.has(place.place_id)) {
-                        return false; // Skip places that are already indexed
-                    } else {
-                        // Add place to the registry
-                        indexedPlaces.set(place.place_id);
-                        return true;
-                    }
-                });
-                const filteredBuildings = filteredResults.map(place => ({
-                    name: place.name,
-                    building_id: place.place_id,
-                    types: place.types,
-                }));
-                console.log(`Results for ${type}:`, filteredBuildings);
-                buildings[type] = filteredBuildings;
-            } else {
-                console.error(`Error fetching places for ${type}:`, status);
-            }
-        });
+        getAllPlaces(service, request, type, buildings[type]);
     });
     console.log("All buildings:", buildings);
+}
+
+function getAllPlaces(service, request, type, resultsArray = []) {
+    service.nearbySearch(request, (results, status, pagination) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+            results.forEach(place => {
+                if (!place.types.includes('doctor') && !indexedPlaces.has(place.place_id)) {  // Exclude unwanted types
+                    indexedPlaces.add(place.place_id);
+                    resultsArray.push({
+                        name: place.name,
+                        building_id: place.place_id,
+                    });
+                }
+            });
+            // If there are more pages, fetch the next page recursively
+            if (pagination && pagination.hasNextPage) {
+                setTimeout(() => {
+                    pagination.nextPage();
+                }, 2000);  // Delay to avoid hitting API limits
+            } else {
+                if (type == 'school') {
+                    buildings[type] = buildings[type].slice(0, 10);  // Limit schools to 10
+                }
+                if (type == 'home') {
+                    buildings[type] = buildings[type].slice(0, 10);  // Limit apartments to 10
+                }
+                // console.log(`All ${type}s found within the box:`, resultsArray);
+            }
+        } else {
+            console.error(`Error fetching places for ${type}:`, status);
+        }
+    });
 }
 
 function startSimulation() {
@@ -79,8 +92,8 @@ function startSimulation() {
         console.log("Simulation result:", data);
     })
     .catch(error => console.error("Error running simulation:", error));
-    for (let i = 0; i < 24; i++) {
-        tick();
+    for (let i = 0; i < 100; i++) {
+        setTimeout(tick(), 2000);
     }
 }
 
@@ -137,9 +150,9 @@ function initializeSIRGraph() {
     });
 }
 
-let S = 0, I = 0, R = 0;
 
 function updateSIRGraph(data) {
+    let S = 0, I = 0, R = 0;
     const time = data.time;
     data.forEach(building => {
         S += building["S"];
