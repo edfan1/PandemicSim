@@ -90,6 +90,10 @@ class City:
             person.set_employment(self)
             home.add_occupant(person)
         self.city['home'].append(home)
+    
+    def add_appartment(self, id, num_units = 50):
+        for i in range(num_units):
+            self.add_home(id, random.randint(1, 4), random.randint(0, 1))
 
     def inject_patient_zero(self):
         patients_home = random.choice(self.city['home'])

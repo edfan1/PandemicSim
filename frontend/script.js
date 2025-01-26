@@ -18,35 +18,41 @@ async function initMap() {
         mapId: "e442d3b4191ab219",
     });
     const service = new google.maps.places.PlacesService(map);
-    const types = ['hospital', 'restaurant', 'school', 'office', 'store'];
-
-    types.forEach(type => {
+    const types = {
+        'hospital': ['hospital'], 
+        'restaurant': ['restaurant'], 
+        'school': ['school', 'university', 'secondary_school', 'primary_school'], 
+        'office': ['corporate_office', 'bank', 'government_office', 'post_office', 'library'], 
+        'store': ['store'], 
+        'home': ['apartment_building', 'apartment_complex', 'condominium_complex', 'housing_complex']
+    };
+    Object.entries(types).forEach(([key, value]) => {
         const request = {
             location: map.getCenter(),
             radius: 5000,
-            type: type 
+            types: value 
         };
-
+        if (key === 'home') {
+            console.log("Home request:", request);
+        }
         service.nearbySearch(request, (results, status) => {
             if (status === google.maps.places.PlacesServiceStatus.OK) {
                 const filteredResults = results.filter(place => 
-                    place.types.includes(type) && !place.types.includes('doctor')
+                    place.types.some(item => value.includes(item)) && !place.types.includes('doctor')
                 );
                 const filteredBuildings = filteredResults.map(place => ({
                     name: place.name,
                     building_id: place.place_id,
                     types: place.types,
                 }));
-
-                console.log(`Results for ${type}:`, filteredBuildings);
-                buildings[type] = filteredBuildings;
+                console.log(`Results for ${key}:`, filteredBuildings);
+                buildings[key].push(filteredBuildings);
             } else {
-                console.error(`Error fetching places for ${type}:`, status);
+                console.error(`Error fetching places for ${key}:`, status);
             }
         });
     });
     console.log("All buildings:", buildings);
-
     alert("Map Init!");
 }
 

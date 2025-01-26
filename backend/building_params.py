@@ -11,7 +11,7 @@ building_construct = {
     'hospital': {'name': 'Hospital', 'capacity': 500, 'staff': 300, 'type': 'hospital', 'infection_rate': 0.1},
     'school': {'name': 'School', 'capacity': 500, 'staff': 100, 'type': 'school', 'infection_rate': 0.05},
     'office': {'name': 'Office', 'capacity': 150, 'staff': 150, 'type': 'office', 'infection_rate': 0.05},
-    'home': {'name': 'Home', 'capacity': 10, 'staff': 0, 'type': 'home', 'infection_rate': 0.2},
+    'home': {'name': 'Home', 'capacity': 6, 'staff': 0, 'type': 'home', 'infection_rate': 0.2},
     'restaurant': {'name': 'Restaurant', 'capacity': 100, 'staff': 25, 'type': 'restaurant', 'infection_rate': 0.025},
     'store': {'name': 'Store', 'capacity': 200, 'staff': 50, 'type': 'store', 'infection_rate': 0.025},
 }
