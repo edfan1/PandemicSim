@@ -25,8 +25,7 @@ async def run_simulation(building_types: Dict[str, List[Building]]):
             for building in buildings:
                 city.construct_building(building_type, building.building_id)
     # Return the simulation results
-    run_test_sim(city)
-    return "hello"
+    return "Success"
 
 @router.post("/tick")
 async def tick():
