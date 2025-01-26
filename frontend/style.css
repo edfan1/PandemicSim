@@ -134,7 +134,27 @@ html, body {
     line-height: 40px;  /* Center text vertically */
 }
 
-/* Show timer only when controls are collapsed */
-#controls.collapsed + #timer {
+
+#stopbtn {
+    display: none; /* Hide initially */
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+}
+
+#stopbtn:hover {
+    background-color: darkred;
+}
+
+/* Show stop button only when controls are collapsed */
+#controls.collapsed + #sirGraphContainer + #timer + #stopbtn {
     display: block;
 }
