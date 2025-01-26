@@ -10,23 +10,20 @@ city = City()
 # Endpoint to receive building data and run the simulation
 @router.post("/run-simulation", response_model=str)
 async def run_simulation(building_types: Dict[str, List[Building]]):
-    city = City()
+    city.reset()
     if not building_types:
         raise HTTPException(status_code=400, detail="No building data provided")
-
     for building_type, buildings in building_types.items():
         if building_type == 'home':
             for building in buildings:
-                if 'apartment_building' or 'housing_complex' in building.types:
-                    city.add_appartment(building.building_id, 50)
-                else:
-                    city.add_complex(building.building_id, 75)
+                city.add_apartment(building.building_id, 50)
         else:
             for building in buildings:
                 city.construct_building(building_type, building.building_id)
     # Return the simulation results
-    return "Success"
+    # city.inject_patient_zero()
+    return "hello"
 
-@router.post("/tick")
+@router.post("/tick", response_model=List[BuildingCounts])
 async def tick():
-    return {'time': city.update_city(), 'building_counts': city.get_building_counts()}
+    return city.get_building_counts()

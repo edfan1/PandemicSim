@@ -8,6 +8,7 @@ let buildings = {
     "home": []
 };
 let hospitalMarkers = new Map(); // Store unique hospitals by place_id
+let bounds = null;
 
 async function initMap() {
     const center = { lat: 39.952305, lng: -75.193703 }; // Philadelphia
@@ -16,49 +17,49 @@ async function initMap() {
         zoom: 15,
         center: center,
         mapId: "e442d3b4191ab219",
-        disableDefaultUI: false, // Set to true to remove all controls
-        zoomControl: false,      // Remove zoom buttons (+, -)
-        fullscreenControl: false, // Remove fullscreen button
-        streetViewControl: false, // Remove Pegman (Street View control)
-        mapTypeControl: false,    // Remove map type control
     });
+    drawBoundingBox();
+    initializeSIRGraph();
+    findNearby();
+    alert("Map Init!");
+}
+
+function findNearby() {
     const service = new google.maps.places.PlacesService(map);
-    const types = {
-        'hospital': ['hospital'], 
-        'restaurant': ['restaurant'], 
-        'school': ['school', 'university', 'secondary_school', 'primary_school'], 
-        'office': ['corporate_office', 'bank', 'government_office', 'post_office', 'library'], 
-        'store': ['store'], 
-        'home': ['apartment_building', 'apartment_complex', 'condominium_complex', 'housing_complex']
-    };
-    Object.entries(types).forEach(([key, value]) => {
+    const types = ['hospital', 'restaurant', 'school', 'office', 'store', 'home'];
+    const indexedPlaces = new Map();
+    types.forEach(type => {
         const request = {
-            location: map.getCenter(),
-            radius: 5000,
-            types: value 
+            bounds: bounds,
+            type: type 
         };
-        if (key === 'home') {
-            console.log("Home request:", request);
+        if (type === 'home') {
+            request.type = 'apartment or residential';
         }
         service.nearbySearch(request, (results, status) => {
             if (status === google.maps.places.PlacesServiceStatus.OK) {
-                const filteredResults = results.filter(place => 
-                    place.types.some(item => value.includes(item)) && !place.types.includes('doctor')
-                );
+                const filteredResults = results.filter(place => {
+                    if (place.types.includes('doctor') || indexedPlaces.has(place.place_id)) {
+                        return false; // Skip places that are already indexed
+                    } else {
+                        // Add place to the registry
+                        indexedPlaces.set(place.place_id);
+                        return true;
+                    }
+                });
                 const filteredBuildings = filteredResults.map(place => ({
                     name: place.name,
                     building_id: place.place_id,
                     types: place.types,
                 }));
-                console.log(`Results for ${key}:`, filteredBuildings);
-                buildings[key].push(filteredBuildings);
+                console.log(`Results for ${type}:`, filteredBuildings);
+                buildings[type] = filteredBuildings;
             } else {
-                console.error(`Error fetching places for ${key}:`, status);
+                console.error(`Error fetching places for ${type}:`, status);
             }
         });
     });
     console.log("All buildings:", buildings);
-    alert("Map Init!");
 }
 
 function startSimulation() {
@@ -78,7 +79,82 @@ function startSimulation() {
         console.log("Simulation result:", data);
     })
     .catch(error => console.error("Error running simulation:", error));
-    initializeSIRGraph();
+    for (let i = 0; i < 24; i++) {
+        tick();
+    }
+}
+
+function tick() {
+    fetch('http://[::]:8000/tick', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Simulation result:", data);
+        updateSIRGraph(data);
+    })
+    .catch(error => console.error("Error running simulation:", error));
+}
+
+function initializeSIRGraph() {
+    const ctx = document.getElementById('sirGraph').getContext('2d');
+    window.sirChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: 'Susceptible',
+                    data: [],
+                    borderColor: 'yellow',
+                    fill: false
+                },
+                {
+                    label: 'Infected',
+                    data: [],
+                    borderColor: 'red',
+                    fill: false
+                },
+                {
+                    label: 'Recovered',
+                    data: [],
+                    borderColor: 'blue',
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { title: { display: true, text: 'Time (hours)' } },
+                y: { title: { display: true, text: 'People' } }
+            }
+        }
+    });
+}
+
+let S = 0, I = 0, R = 0;
+
+function updateSIRGraph(data) {
+    const time = data.time;
+    data.forEach(building => {
+        S += building["S"];
+        I += building["I"];
+        R += building["R"];
+    });
+    console.log("S:", S, "I:", I, "R:", R);
+
+    if (window.sirChart) {
+        window.sirChart.data.labels.push(time);
+        window.sirChart.data.datasets[0].data.push(S);
+        window.sirChart.data.datasets[1].data.push(I);
+        window.sirChart.data.datasets[2].data.push(R);
+        window.sirChart.update();
+    }
 }
 
 function findHospitals() {
@@ -145,290 +221,58 @@ function updateLocation() {
         }
     });
 }
+let currentRectangle = null;
 
-let allResults = {
-    hospitals: [],
-    restaurants: [],
-    schools: [],
-    offices: [],
-    stores: []
-};
+function drawBoundingBox() {
+    const verticalKm = parseFloat(document.getElementById("verticalDistance").value) || 0;
+    const horizontalKm = parseFloat(document.getElementById("horizontalDistance").value) || 0;
 
-function searchNearbyPlaces(bounds) {
-    const service = new google.maps.places.PlacesService(map);
-    const types = ['hospital', 'restaurant', 'school', 'office', 'store'];
+    if (verticalKm === 0 || horizontalKm === 0) {
+        alert("Please enter valid distances.");
+        return;
+    }
 
-    types.forEach(type => {
-        allResults[type + 's'] = []; // Reset results for each type
-        const request = {
-            bounds: bounds,  // Search within the drawn box
-            type: type
-        };
-        
-        getAllPlaces(service, request, type);
+    // Remove existing rectangle if present
+    if (currentRectangle) {
+        currentRectangle.setMap(null);
+    }
+
+    // Conversion factors: 1 km ≈ 0.009 degrees latitude, 1 km ≈ 0.0113 degrees longitude
+    const kmToLat = 0.009;
+    const kmToLng = 0.0113;
+
+    const currentCenter = map.getCenter();
+    const latCenter = currentCenter.lat();
+    const lngCenter = currentCenter.lng();
+
+    // Calculate the rectangle bounds based on the distances in kilometers
+    const northLat = latCenter + (verticalKm / 2) * kmToLat;
+    const southLat = latCenter - (verticalKm / 2) * kmToLat;
+    const eastLng = lngCenter + (horizontalKm / 2) * kmToLng;
+    const westLng = lngCenter - (horizontalKm / 2) * kmToLng;
+
+    // Define rectangle bounds
+    bounds = {
+        north: northLat,
+        south: southLat,
+        east: eastLng,
+        west: westLng
+    };
+
+    // Draw the rectangle on the map (non-editable and non-draggable)
+    currentRectangle = new google.maps.Rectangle({
+        bounds: bounds,
+        editable: false,  // Prevent dragging/resizing
+        draggable: false, // Prevent movement
+        strokeColor: "#FF0000",
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor: "#FF0000",
+        fillOpacity: 0,
+        map: map
     });
-}
-
-function getAllPlaces(service, request, type, resultsArray = []) {
-    service.nearbySearch(request, (results, status, pagination) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK) {
-            results.forEach(place => {
-                if (!place.types.includes('doctor')) {  // Exclude unwanted types
-                    resultsArray.push({
-                        name: place.name,
-                        type: place.types,
-                        latitude: place.geometry.location.lat(),
-                        longitude: place.geometry.location.lng()
-                    });
-                }
-            });
-
-            // If there are more pages, fetch the next page recursively
-            if (pagination && pagination.hasNextPage) {
-                setTimeout(() => {
-                    pagination.nextPage();
-                }, 2000);  // Delay to avoid hitting API limits
-            } else {
-                // Store the final results once all pages are retrieved
-                allResults[type + 's'] = resultsArray;
-                console.log(`All ${type}s found within the box:`, resultsArray);
-            }
-        } else {
-            console.error(`Error fetching places for ${type}:`, status);
-        }
-    });
-}
-
-    function drawPeople() {
-        fetch('http://[::]:8000/tick', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Simulation data:', data);
-    
-            data.building_counts.forEach(building => {
-                if (hospitalMarkers.has(building.id)) {
-                    const hospitalLocation = hospitalMarkers.get(building.id);
-                    placeSusceptibleDots(hospitalLocation, building.S);
-                    placeInfectedDots(hospitalLocation, building.R);
-                    placeRecoveredDots(hospitalLocation, building.R);
-
-                }
-            });
-        })
-        .catch(error => console.error("Error running simulation:", error));
-    }
-    
-    function placeSusceptibleDots(center, count) {
-        const radius = 0.0003;  // Approx 30 meters, adjust as needed
-        for (let i = 0; i < count; i++) {
-            const randomLat = center.lat() + (Math.random() * 2 - 1) * radius;
-            const randomLng = center.lng() + (Math.random() * 2 - 1) * radius;
-    
-            new google.maps.Marker({
-                position: { lat: randomLat, lng: randomLng },
-                map: map,
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 4,
-                    fillColor: 'yellow',
-                    fillOpacity: 0.8,
-                    strokeWeight: 0,
-                }
-            });
-        }
-    }
-    function placeRecoveredDots(center, count) {
-        const radius = 0.0003;  // Approx 30 meters, adjust as needed
-        for (let i = 0; i < count; i++) {
-            const randomLat = center.lat() + (Math.random() * 2 - 1) * radius;
-            const randomLng = center.lng() + (Math.random() * 2 - 1) * radius;
-    
-            new google.maps.Marker({
-                position: { lat: randomLat, lng: randomLng },
-                map: map,
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 4,
-                    fillColor: 'blue',
-                    fillOpacity: 0.8,
-                    strokeWeight: 0,
-                }
-            });
-        }
-    }
-    function placeInfectedDots(center, count) {
-        const radius = 0.0003;  // Approx 30 meters, adjust as needed
-        for (let i = 0; i < count; i++) {
-            const randomLat = center.lat() + (Math.random() * 2 - 1) * radius;
-            const randomLng = center.lng() + (Math.random() * 2 - 1) * radius;
-    
-            new google.maps.Marker({
-                position: { lat: randomLat, lng: randomLng },
-                map: map,
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 4,
-                    fillColor: 'red',
-                    fillOpacity: 0.8,
-                    strokeWeight: 0,
-                }
-            });
-        }
-    }
-
-
-    let currentRectangle = null;
-
-    function drawBoundingBox() {
-        const verticalKm = parseFloat(document.getElementById("verticalDistance").value) || 0;
-        const horizontalKm = parseFloat(document.getElementById("horizontalDistance").value) || 0;
-    
-        if (verticalKm === 0 || horizontalKm === 0) {
-            alert("Please enter valid distances.");
-            return;
-        }
-    
-        // Remove existing rectangle if present
-        if (currentRectangle) {
-            currentRectangle.setMap(null);
-        }
-    
-        // Conversion factors: 1 km ≈ 0.009 degrees latitude, 1 km ≈ 0.0113 degrees longitude
-        const kmToLat = 0.009;
-        const kmToLng = 0.0113;
-    
-        const currentCenter = map.getCenter();
-        const latCenter = currentCenter.lat();
-        const lngCenter = currentCenter.lng();
-    
-        // Calculate the rectangle bounds based on the distances in kilometers
-        const northLat = latCenter + (verticalKm / 2) * kmToLat;
-        const southLat = latCenter - (verticalKm / 2) * kmToLat;
-        const eastLng = lngCenter + (horizontalKm / 2) * kmToLng;
-        const westLng = lngCenter - (horizontalKm / 2) * kmToLng;
-    
-        // Define rectangle bounds
-        const bounds = {
-            north: northLat,
-            south: southLat,
-            east: eastLng,
-            west: westLng
-        };
-    
-        // Draw the rectangle on the map (non-editable and non-draggable)
-        currentRectangle = new google.maps.Rectangle({
-            bounds: bounds,
-            editable: false,  // Prevent dragging/resizing
-            draggable: false, // Prevent movement
-            strokeColor: "#FF0000",
-            strokeOpacity: 0.8,
-            strokeWeight: 2,
-            fillColor: "#FF0000",
-            fillOpacity: 0,
-            map: map
-        });
-    
-        map.fitBounds(bounds);
-        searchNearbyPlaces(bounds);
-
-    }
-    
-    document.getElementById("toggleControls").addEventListener("click", function() {
-        const controls = document.getElementById("controls");
-        controls.classList.toggle("collapsed");
-        
-        // Toggle between '+' and '-' symbols
-        this.textContent = controls.classList.contains("collapsed") ? '+' : '−';
-    });
-    
-    function isControlsCollapsed() {
-        const controls = document.getElementById("controls");
-        return controls.classList.contains("collapsed");
-    }
-
-async function fetchSimulationData() {
-    if (!isControlsCollapsed) {
-        const controls = document.getElementById("controls");
-        controls.classList.toggle("collapsed");
-    }
-    fetch('http://[::]:8000/tick', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Simulation data:', data);
-        updateSIRGraph(data);
-    })
-    .catch(error => console.error("Error running simulation:", error));
-}
-
-function initializeSIRGraph() {
-    const ctx = document.getElementById('sirGraph').getContext('2d');
-    window.sirChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [
-                {
-                    label: 'Susceptible',
-                    data: [],
-                    borderColor: 'yellow',
-                    fill: false
-                },
-                {
-                    label: 'Infected',
-                    data: [],
-                    borderColor: 'red',
-                    fill: false
-                },
-                {
-                    label: 'Recovered',
-                    data: [],
-                    borderColor: 'blue',
-                    fill: false
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: { title: { display: true, text: 'Time (hours)' } },
-                y: { title: { display: true, text: 'People' } }
-            }
-        }
-    });
-}
-
-function updateSIRGraph(data) {
-    const time = data.time;
-    let S = 0, I = 0, R = 0;
-
-    data.building_counts.forEach(building => {
-        S += building.S;
-        I += building.I;
-        R += building.R;
-    });
-
-    if (window.sirChart) {
-        window.sirChart.data.labels.push(time);
-        window.sirChart.data.datasets[0].data.push(S);
-        window.sirChart.data.datasets[1].data.push(I);
-        window.sirChart.data.datasets[2].data.push(R);
-        window.sirChart.update();
-    }
-}
-
-// Call fetchSimulationData every 5 seconds to update the graph
-setInterval(fetchSimulationData, 5000);
+    map.fitBounds(bounds);
+}    
 
 // handler (user-input) functions (empty for now - to add backend updates)
 
