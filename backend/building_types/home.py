@@ -1,11 +1,13 @@
 import random
 
 def home_update_fn(building, time, city):
+    print(f"Home update at {time}")
     if time == 9 or (time >= 17 and time <= 22):
         i = 0
         while i < building.size:
             person = building.occupants[i]
             if time == 9 and (person.occupation == 'student' or person.occupation == 'employed'):
+                print(f"{person.name} is going to work or school")
                 building.remove_occupant(person)
                 person.employer.add_occupant(person)
                 i -= 1

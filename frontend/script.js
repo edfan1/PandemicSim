@@ -9,6 +9,7 @@ let buildings = {
 };
 let hospitalMarkers = new Map(); // Store unique hospitals by place_id
 let bounds = null;
+let tickInterval = null;
 
 async function initMap() {
     const center = { lat: 39.952305, lng: -75.193703 }; // Philadelphia
@@ -120,9 +121,11 @@ function startSimulation() {
         console.log("Simulation result:", data);
     })
     .catch(error => console.error("Error running simulation:", error));
-    for (let i = 0; i < 100; i++) {
-        setTimeout(tick(), 2000);
-    }
+    tickInterval = setInterval(tick, 100);
+}
+
+function stopTick() {
+    clearInterval(tickInterval);
 }
 
 function tick() {
@@ -142,7 +145,7 @@ function tick() {
 
 function initializeSIRGraph() {
     const ctx = document.getElementById('sirGraph').getContext('2d');
-    window.sirChart = new Chart(ctx, {
+    window.sirGraph = new Chart(ctx, {
         type: 'line',
         data: {
             labels: [],
@@ -178,10 +181,11 @@ function initializeSIRGraph() {
     });
 }
 
+let time = 0;
 
 function updateSIRGraph(data) {
     let S = 0, I = 0, R = 0;
-    const time = data.time;
+    time++;
     data.forEach(building => {
         S += building["S"];
         I += building["I"];
@@ -189,12 +193,12 @@ function updateSIRGraph(data) {
     });
     console.log("S:", S, "I:", I, "R:", R);
 
-    if (window.sirChart) {
-        window.sirChart.data.labels.push(time);
-        window.sirChart.data.datasets[0].data.push(S);
-        window.sirChart.data.datasets[1].data.push(I);
-        window.sirChart.data.datasets[2].data.push(R);
-        window.sirChart.update();
+    if (window.sirGraph) {
+        window.sirGraph.data.labels.push(time);
+        window.sirGraph.data.datasets[0].data.push(S);
+        window.sirGraph.data.datasets[1].data.push(I);
+        window.sirGraph.data.datasets[2].data.push(R);
+        window.sirGraph.update();
     }
 }
 
