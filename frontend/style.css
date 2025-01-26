@@ -178,7 +178,7 @@ html, body {
         1px -1px 0 #000,
         -1px 1px 0 #000,
         1px 1px 0 #000,
-        2px 2px 5px rgba(0, 0, 0, 0.5); /* Outer shadow effect */
+        2px 2px 5px rgba(0, 0, 0, 0.5); Outer shadow effect
 }
 
 /* Specific colors for each count */
