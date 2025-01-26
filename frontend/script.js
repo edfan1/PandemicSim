@@ -10,6 +10,7 @@ let buildings = {
 let hospitalMarkers = new Map(); // Store unique hospitals by place_id
 let bounds = null;
 let tickInterval = null;
+let allCircles = [];
 
 async function initMap() {
     const center = { lat: 39.952305, lng: -75.193703 }; // Philadelphia
@@ -25,7 +26,7 @@ async function initMap() {
         mapTypeControl: false,
     });
     drawBoundingBox();
-    drawCircles(10, 10, 10, center);
+    drawCircles(100, 100, 100, center);
     initializeSIRGraph();
     findNearby();
 }
@@ -143,6 +144,7 @@ function tick() {
     .then(data => {
         console.log("Simulation result:", data);
         updateSIRGraph(data);
+        updateDotsGraph(data);
     })
     .catch(error => console.error("Error running simulation:", error));
 }
@@ -292,6 +294,31 @@ function updateSIRGraph(data) {
     document.getElementById("recoveredCount").textContent = R;
 }
 
+function clearCircles() {
+    // Loop through and remove each circle from the map
+    allCircles.forEach(circle => circle.setMap(null));
+    // Clear the array
+    allCircles = [];
+}
+
+function updateDotsGraph(data) {
+
+    clearCircles(); // toggle as comment or not
+    
+    data.forEach(building => {
+        let location = null;
+        if (indexedPlaces.has(building["building_id"])) {
+            console.log("building is indexed");
+            location = indexedPlaces.get(building["building_id"]);
+        }
+        else {
+            console.log("building not indexed!");
+        }
+        drawCircles(building["S"], building["I"], building["R"], location);
+        drawStayAtHomers(building["S"]/50, building["I"]/50, building["R"]/50, bounds);
+    });
+}
+
 
 // Stop timer when needed (e.g., simulation ends)
 function stopTimer() {
@@ -338,27 +365,6 @@ function isValidHospital(place) {
     const validTypes = ["hospital", "health"];
     return place.name.toLowerCase().includes("hospital") && place.types.some(type => validTypes.includes(type));
 }
-
-// // Function to add hospital marker using AdvancedMarkerElement
-// function addHospitalMarker(location, title) {
-//     const parser = new DOMParser();
-//     // A marker with a custom inline SVG.
-//     const pinSvgString =
-//     '<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" fill="none"><rect width="56" height="56" rx="28" fill="#7837FF"></rect><path d="M46.0675 22.1319L44.0601 22.7843" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M11.9402 33.2201L9.93262 33.8723" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M27.9999 47.0046V44.8933" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M27.9999 9V11.1113" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M39.1583 43.3597L37.9186 41.6532" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16.8419 12.6442L18.0816 14.3506" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9.93262 22.1319L11.9402 22.7843" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M46.0676 33.8724L44.0601 33.2201" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M39.1583 12.6442L37.9186 14.3506" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16.8419 43.3597L18.0816 41.6532" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M28 39L26.8725 37.9904C24.9292 36.226 23.325 34.7026 22.06 33.4202C20.795 32.1378 19.7867 30.9918 19.035 29.9823C18.2833 28.9727 17.7562 28.0587 17.4537 27.2401C17.1512 26.4216 17 25.5939 17 24.7572C17 23.1201 17.5546 21.7513 18.6638 20.6508C19.7729 19.5502 21.1433 19 22.775 19C23.82 19 24.7871 19.2456 25.6762 19.7367C26.5654 20.2278 27.34 20.9372 28 21.8649C28.77 20.8827 29.5858 20.1596 30.4475 19.6958C31.3092 19.2319 32.235 19 33.225 19C34.8567 19 36.2271 19.5502 37.3362 20.6508C38.4454 21.7513 39 23.1201 39 24.7572C39 25.5939 38.8488 26.4216 38.5463 27.2401C38.2438 28.0587 37.7167 28.9727 36.965 29.9823C36.2133 30.9918 35.205 32.1378 33.94 33.4202C32.675 34.7026 31.0708 36.226 29.1275 37.9904L28 39Z" fill="#FF7878"></path></svg>';
-//     const pinSvg = parser.parseFromString(
-//     pinSvgString,
-//     "image/svg+xml",
-//     ).documentElement;
-
-//     const advancedMarker = new google.maps.marker.AdvancedMarkerElement({
-//         position: location,
-//         map: map,
-//         title: title,
-//         content: pinSvg,
-//     });
-
-//     hospitalMarkers.set(title, advancedMarker);
-// }
 
 function updateLocation() {
     const address = document.getElementById("locationInput").value;
@@ -429,14 +435,9 @@ function drawBoundingBox() {
 }    
 
 
-function drawCircles(infected, susceptible, recovered, location) {
+function drawCircles(susceptible, infected, recovered, location) {
     // Check if the location is valid
-    if (!location || 
-        (typeof location.lat !== "function" && typeof location.lat !== "number") || 
-        (typeof location.lng !== "function" && typeof location.lng !== "number")) {
-        alert("Please provide a valid location with lat and lng.");
-        return;
-    }
+    if (!location) return;
 
     // Extract latitude and longitude
     const centerLat = typeof location.lat === "function" ? location.lat() : location.lat;
@@ -448,7 +449,7 @@ function drawCircles(infected, susceptible, recovered, location) {
 
     // Function to create a circle on the map
     function createCircle(lat, lng, color) {
-        return new google.maps.Circle({
+        const circle = new google.maps.Circle({
             strokeColor: color,
             strokeOpacity: 0.8,
             strokeWeight: 2,
@@ -458,27 +459,98 @@ function drawCircles(infected, susceptible, recovered, location) {
             center: { lat: lat, lng: lng },
             radius: 1 // Radius in meters, adjust as needed
         });
+        allCircles.push(circle);
     }
+
+    // Function to generate exponentially decaying offsets
+    function generateGaussianOffset(maxDistance) {
+        const standardDeviation = maxDistance / 3; // 99.7% of points fall within maxDistance (3σ rule)
+
+        // Generate random values with a normal (Gaussian) distribution
+        function sampleNormalDistribution() {
+            const u1 = Math.random();
+            const u2 = Math.random();
+            const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2); // Box-Muller transform
+            return z0; // Standard normal variable (mean = 0, std = 1)
+        }
+
+        const distance = Math.abs(sampleNormalDistribution() * standardDeviation); // Scale by std dev and ensure non-negative
+        const angle = Math.random() * 2 * Math.PI; // Random angle
+
+        const latOffset = distance * Math.cos(angle) * kmToLat;
+        const lngOffset = distance * Math.sin(angle) * kmToLng;
+
+        return { latOffset, lngOffset };
+    }
+
+    // Maximum distance for decay (in km)
+    const maxDistance = .1;
 
     // Add circles for infected (red)
     for (let i = 0; i < infected; i++) {
-        const latOffset = (Math.random() - 0.5)*0.03 * kmToLat; // Random offset to scatter the circles
-        const lngOffset = (Math.random() - 0.5)*0.03 * kmToLng;
+        const { latOffset, lngOffset } = generateGaussianOffset(maxDistance);
         createCircle(centerLat + latOffset, centerLng + lngOffset, "#FF0000");
     }
 
     // Add circles for susceptible (yellow)
     for (let i = 0; i < susceptible; i++) {
-        const latOffset = (Math.random() - 0.5)*0.03 * kmToLat;
-        const lngOffset = (Math.random() - 0.5)*0.03 * kmToLng;
+        const { latOffset, lngOffset } = generateGaussianOffset(maxDistance);
         createCircle(centerLat + latOffset, centerLng + lngOffset, "#FFFF00");
     }
 
     // Add circles for recovered (blue)
     for (let i = 0; i < recovered; i++) {
-        const latOffset = (Math.random() - 0.5)*0.03 * kmToLat;
-        const lngOffset = (Math.random() - 0.5)*0.03 * kmToLng;
+        const { latOffset, lngOffset } = generateGaussianOffset(maxDistance);
         createCircle(centerLat + latOffset, centerLng + lngOffset, "#0000FF");
+    }
+}
+
+function drawStayAtHomers(susceptible, infected, recovered, bounds) {
+    // Check if the bounds are valid
+    if (!bounds || typeof bounds.north !== "number" || typeof bounds.south !== "number" ||
+        typeof bounds.east !== "number" || typeof bounds.west !== "number") {
+        alert("Please provide valid bounds with north, south, east, and west properties.");
+        return;
+    }
+
+    // Function to generate a random latitude and longitude within the bounds
+    function getRandomLocation() {
+        const lat = Math.random() * (bounds.north - bounds.south) + bounds.south; // Random latitude
+        const lng = Math.random() * (bounds.east - bounds.west) + bounds.west;   // Random longitude
+        return { lat, lng };
+    }
+
+    // Function to create a circle on the map
+    function createCircle(lat, lng, color) {
+        const circle = new google.maps.Circle({
+            strokeColor: color,
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: color,
+            fillOpacity: 0.6,
+            map: map,
+            center: { lat: lat, lng: lng },
+            radius: 1 // Radius in meters, adjust as needed
+        });
+        allCircles.push(circle);
+    }
+
+    // Add circles for infected (red)
+    for (let i = 0; i < infected; i++) {
+        const { lat, lng } = getRandomLocation();
+        createCircle(lat, lng, "#FF0000");
+    }
+
+    // Add circles for susceptible (yellow)
+    for (let i = 0; i < susceptible; i++) {
+        const { lat, lng } = getRandomLocation();
+        createCircle(lat, lng, "#FFFF00");
+    }
+
+    // Add circles for recovered (blue)
+    for (let i = 0; i < recovered; i++) {
+        const { lat, lng } = getRandomLocation();
+        createCircle(lat, lng, "#0000FF");
     }
 }
 
