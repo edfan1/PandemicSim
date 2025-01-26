@@ -24,6 +24,7 @@ async function initMap() {
         mapTypeControl: false,
     });
     drawBoundingBox();
+    drawCircles(10, 10, 10, center);
     initializeSIRGraph();
     findNearby();
 }
@@ -245,7 +246,7 @@ function isValidHospital(place) {
     return place.name.toLowerCase().includes("hospital") && place.types.some(type => validTypes.includes(type));
 }
 
-// Function to add hospital marker using AdvancedMarkerElement
+// // Function to add hospital marker using AdvancedMarkerElement
 // function addHospitalMarker(location, title) {
 //     const parser = new DOMParser();
 //     // A marker with a custom inline SVG.
@@ -334,6 +335,60 @@ function drawBoundingBox() {
     map.fitBounds(bounds);
 }    
 
+
+function drawCircles(infected, susceptible, recovered, location) {
+    // Check if the location is valid
+    if (!location || 
+        (typeof location.lat !== "function" && typeof location.lat !== "number") || 
+        (typeof location.lng !== "function" && typeof location.lng !== "number")) {
+        alert("Please provide a valid location with lat and lng.");
+        return;
+    }
+
+    // Extract latitude and longitude
+    const centerLat = typeof location.lat === "function" ? location.lat() : location.lat;
+    const centerLng = typeof location.lng === "function" ? location.lng() : location.lng;
+
+    // Conversion factor: 1 km ≈ 0.009 degrees latitude, 1 km ≈ 0.0113 degrees longitude
+    const kmToLat = 0.009;
+    const kmToLng = 0.0113;
+
+    // Function to create a circle on the map
+    function createCircle(lat, lng, color) {
+        return new google.maps.Circle({
+            strokeColor: color,
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: color,
+            fillOpacity: 0.6,
+            map: map,
+            center: { lat: lat, lng: lng },
+            radius: 1 // Radius in meters, adjust as needed
+        });
+    }
+
+    // Add circles for infected (red)
+    for (let i = 0; i < infected; i++) {
+        const latOffset = (Math.random() - 0.5)*0.03 * kmToLat; // Random offset to scatter the circles
+        const lngOffset = (Math.random() - 0.5)*0.03 * kmToLng;
+        createCircle(centerLat + latOffset, centerLng + lngOffset, "#FF0000");
+    }
+
+    // Add circles for susceptible (yellow)
+    for (let i = 0; i < susceptible; i++) {
+        const latOffset = (Math.random() - 0.5)*0.03 * kmToLat;
+        const lngOffset = (Math.random() - 0.5)*0.03 * kmToLng;
+        createCircle(centerLat + latOffset, centerLng + lngOffset, "#FFFF00");
+    }
+
+    // Add circles for recovered (blue)
+    for (let i = 0; i < recovered; i++) {
+        const latOffset = (Math.random() - 0.5)*0.03 * kmToLat;
+        const lngOffset = (Math.random() - 0.5)*0.03 * kmToLng;
+        createCircle(centerLat + latOffset, centerLng + lngOffset, "#0000FF");
+    }
+}
+
 document.getElementById("toggleControls").addEventListener("click", function() {
     const controls = document.getElementById("controls");
     const chartContainer = document.getElementById("sirGraphContainer");
@@ -394,6 +449,7 @@ document.getElementById("lockdown").addEventListener("change", handleLockdown);
 
 
 // Load Google Maps API with Places and Geometry libraries
+const GOOGLE_MAPS_API_KEY = "AIzaSyDc1RJKVZuU0tqeZcW4q558ltBa7W857fA";
 const script = document.createElement('script');
 script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY }&libraries=places,geometry&loading=async&callback=initMap`;
 script.async = true;
