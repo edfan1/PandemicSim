@@ -27,8 +27,6 @@ async function initMap() {
         mapTypeControl: false,
     });
     drawBoundingBox();
-    drawCircles(100, 100, 100, center);
-
     google.maps.event.addListenerOnce(map, 'bounds_changed', function() {
         map.setZoom(14.85);  // Adjust zoom here after bounds are set
     });
