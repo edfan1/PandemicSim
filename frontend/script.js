@@ -14,6 +14,11 @@ async function initMap() {
         zoom: 15,
         center: center,
         mapId: "e442d3b4191ab219",
+        disableDefaultUI: false, // Set to true to remove all controls
+        zoomControl: false,      // Remove zoom buttons (+, -)
+        fullscreenControl: false, // Remove fullscreen button
+        streetViewControl: false, // Remove Pegman (Street View control)
+        mapTypeControl: false,    // Remove map type control
     });
     const service = new google.maps.places.PlacesService(map);
     const types = ['hospital', 'restaurant', 'school', 'office', 'store'];
@@ -25,8 +30,6 @@ async function initMap() {
             type: type 
         };
     });
-
-    alert("Map Init!");
 }
 
 function startSimulation() {
@@ -303,7 +306,15 @@ function getAllPlaces(service, request, type, resultsArray = []) {
         map.fitBounds(bounds);
         searchNearbyPlaces(bounds);
 
-    }    
+    }
+    
+    document.getElementById("toggleControls").addEventListener("click", function() {
+        const controls = document.getElementById("controls");
+        controls.classList.toggle("collapsed");
+        
+        // Toggle between '+' and '-' symbols
+        this.textContent = controls.classList.contains("collapsed") ? '+' : '−';
+    });
 
 // handler (user-input) functions (empty for now - to add backend updates)
 

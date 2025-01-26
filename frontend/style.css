@@ -59,3 +59,34 @@ html, body {
 #controls button:hover {
     background: #0056b3;
 }
+
+#toggleControls {
+    position: absolute;
+    top: 5px;
+    right: 12px;
+    font-size: 22px;
+    font-weight: bold;
+    color: black;
+    cursor: pointer;
+    user-select: none;
+}
+
+#controls.collapsed {
+    padding-top: 30px; /* Prevent overlap of the toggle button */
+    height: 20px;
+    overflow: hidden;
+}
+
+#controls.collapsed *:not(#toggleControls) {
+    display: none;
+}
+
+
+#cornerImage {
+    position: fixed;
+    top: 20px;  /* Adjust to move up if needed */
+    left: 20px;   /* Adjust to move left if needed */
+    width: 150px;  /* Adjust the size as needed */
+    height: auto;  /* Maintain aspect ratio */
+    z-index: 1000; /* Ensure it appears on top of other elements */
+}
