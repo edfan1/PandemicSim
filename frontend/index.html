@@ -18,11 +18,11 @@
         <div style="height: 15px;"></div>
         <label>
             Vertical Distance (km):
-            <input type="number" id="verticalDistance" min="0" step="0.1" placeholder="Enter km">
+            <input type="number" id="verticalDistance" min="0" step="0.1" placeholder="Enter km" value="3">
         </label>
         <label>
             Horizontal Distance (km):
-            <input type="number" id="horizontalDistance" min="0" step="0.1" placeholder="Enter km">
+            <input type="number" id="horizontalDistance" min="0" step="0.1" placeholder="Enter km" value ="3">
         </label>
         <button onclick="drawBoundingBox()">Set City Bounds</button>
         <div style="height: 15px;"></div>
@@ -35,7 +35,7 @@
     Infection Rate:
     <input type="decimal" id="infectionRate" min=".001" placeholder="Enter rate">
 </label>
-<button onclick="startSimulation(); drawPeople();">Start Simulation</button>
+<button onclick="startSimulation();">Start Simulation</button>
 <div style="height: 15px;"></div>
 
         <h3>City Statistics</h3>
@@ -68,6 +68,7 @@
     <img src="herebeforeitgoesviral.png" id="cornerImage" alt="Corner Image">
     <script src="config.js"></script>
     <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <div id="sirGraphContainer">
         <canvas id="sirGraph"></canvas>
     </div>

@@ -18,6 +18,17 @@ class City:
             'home': [],
             'store': [],
         }
+    
+    def reset(self):
+        self.clock = datetime(2025, 1, 1, 6, 0, 0)
+        self.city = {
+            'restaurant': [],
+            'hospital': [],
+            'school': [],
+            'office': [],
+            'home': [],
+            'store': [],
+        }
 
     def update_city(self):
         self.clock += timedelta(hours=1)
@@ -25,6 +36,9 @@ class City:
             for building in self.city[types]:
                 building.update()
                 building_update_fn[types](building, self.clock.hour, self)
+
+    def get_total_buildings(self):
+        return sum([len(buildings) for buildings in self.city.values()])
 
     def get_counts(self):
         counts = {
@@ -43,7 +57,7 @@ class City:
         counts = []
         for buildings in self.city.values():
             for building in buildings:
-                counts.append({'id': building.id, 'S': building.sus, 'I': building.inf, 'R': building.rec})
+                counts.append({'building_id': building.id, 'S': building.sus, 'I': building.inf, 'R': building.rec})
         return counts
 
     def get_workplace(self, person):
@@ -91,7 +105,7 @@ class City:
             home.add_occupant(person)
         self.city['home'].append(home)
     
-    def add_appartment(self, id, num_units = 50):
+    def add_apartment(self, id, num_units = 50):
         for i in range(num_units):
             self.add_home(id, random.randint(1, 4), random.randint(0, 1))
 
