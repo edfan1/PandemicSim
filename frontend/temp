@@ -30,7 +30,7 @@ async function initMap() {
     findNearby();
 }
 
-const indexedPlaces = new Map();
+const indexedPlaces = new Set();
 
 function findNearby() {
     indexedPlaces.clear();
@@ -54,7 +54,7 @@ function getAllPlaces(service, request, type, resultsArray = []) {
         if (status === google.maps.places.PlacesServiceStatus.OK) {
             results.forEach(place => {
                 if (!place.types.includes('doctor') && !indexedPlaces.has(place.place_id)) {  // Exclude unwanted types
-                    indexedPlaces.set(place.place_id, {lng : place.geometry.location.lng(), lat : place.geometry.location.lat()});
+                    indexedPlaces.add(place.place_id);
                     resultsArray.push({
                         name: place.name,
                         building_id: place.place_id,
@@ -84,6 +84,7 @@ function getAllPlaces(service, request, type, resultsArray = []) {
 let daysElapsed = 0;
 let dayTimerInterval;
 
+
 function startSimulation() {
     if (Object.keys(buildings).length === 0) {
         alert("No building data available!");
@@ -95,8 +96,6 @@ function startSimulation() {
     const chartContainer = document.getElementById("sirGraphContainer");
     const timerDisplay = document.getElementById("timer");
     const stopButton = document.getElementById("stopbtn");
-    const stats = document.getElementById("statisticsBox");
-
 
     // Collapse controls and show necessary elements
     if (!controls.classList.contains("collapsed")) {
@@ -104,11 +103,9 @@ function startSimulation() {
         chartContainer.style.display = "block";  // Show chart when collapsed
         timerDisplay.style.display = "block";  // Show timer
         stopButton.style.display = "block";  // Show stop button
-        stats.style.display = "block"
         document.getElementById("toggleControls").textContent = "+";
     }
 
-    // Reset and start timer
     daysElapsed = 0;
     updateDayTimerDisplay();
     clearInterval(dayTimerInterval);
@@ -174,6 +171,7 @@ function stopSimulation() {
         }
     }
 }
+
 
 function initializeSIRGraph() {
     const ctx = document.getElementById('sirGraph').getContext('2d');
@@ -261,7 +259,9 @@ function initializeSIRGraph() {
                 }
             },
             animation: {
-                duration: 1000,          
+                duration: 1000, // Smooth animation
+                // easing: 'easeInOutQuad'
+            
             }
     }
 });
@@ -286,10 +286,6 @@ function updateSIRGraph(data) {
         window.sirGraph.data.datasets[2].data.push(R);
         window.sirGraph.update();
     }
-
-    document.getElementById("susceptibleCount").textContent = S;
-    document.getElementById("infectedCount").textContent = I;
-    document.getElementById("recoveredCount").textContent = R;
 }
 
 
@@ -502,66 +498,38 @@ document.getElementById("toggleControls").addEventListener("click", function() {
 
 // handler (user-input) functions (empty for now - to add backend updates)
 
+function handleCityPopulation() {
+    const cityPopulation = parseInt(document.getElementById("cityPopulation").value, 10);
+    console.log("City Population:", cityPopulation);
+}
+
+function handleInfectionRate() {
+    const infectionRate = parseFloat(document.getElementById("infectionRate").value);
+    console.log("Infection Rate:", infectionRate);
+}
+
 function handleMaskMandate() {
-    fetch('http://[::]:8000/activate', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({protocol: "mask"})
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Protocol updated:", data);
-    })
-    .catch(error => console.error("Error running simulation:", error));
+    const maskMandate = document.getElementById("maskMandate").checked;
+    console.log("Mask Mandate:", maskMandate);
 }
 
 function handleSchoolsClosed() {
-    fetch('http://[::]:8000/activate', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({protocol: "school"})
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Protocol updated:", data);
-    })
-    .catch(error => console.error("Error running simulation:", error));
+    const schoolsClosed = document.getElementById("schoolsClosed").checked;
+    console.log("Schools Closed:", schoolsClosed);
 }
 
 function handleWorkFromHome() {
-    fetch('http://[::]:8000/activate', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({protocol: "work"})
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Protocol updated:", data);
-    })
-    .catch(error => console.error("Error running simulation:", error));
+    const workFromHome = document.getElementById("workFromHome").checked;
+    console.log("Work From Home:", workFromHome);
 }
 
 function handleLockdown() {
-    fetch('http://[::]:8000/activate', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({protocol: "lockdown"})
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Protocol updated:", data);
-    })
-    .catch(error => console.error("Error running simulation:", error));
+    const lockdown = document.getElementById("lockdown").checked;
+    console.log("Lockdown:", lockdown);
 }
 
+document.getElementById("cityPopulation").addEventListener("input", handleCityPopulation);
+document.getElementById("infectionRate").addEventListener("input", handleInfectionRate);
 document.getElementById("maskMandate").addEventListener("change", handleMaskMandate);
 document.getElementById("schoolsClosed").addEventListener("change", handleSchoolsClosed);
 document.getElementById("workFromHome").addEventListener("change", handleWorkFromHome);
