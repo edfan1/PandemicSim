@@ -90,9 +90,9 @@ class City:
         person_params = person_construct[person_type]
         return Person(person_params['name'], person_params['age'], person_params['occupation'])
 
-    def add_home(self, id, adults = 2, children = 2):
+    def add_home(self, id, name="", adults = 2, children = 2):
         home_params = building_construct['home']
-        home = Building(home_params['name'], id, capacity=home_params['capacity'], max_employees=home_params['staff'], type=home_params['type'], infection_rate=home_params['infection_rate'])
+        home = Building(name, id, capacity=home_params['capacity'], max_employees=home_params['staff'], type=home_params['type'], infection_rate=home_params['infection_rate'])
         for i in range(adults):
             person = self.construct_person('worker')
             person.home = home
@@ -107,7 +107,7 @@ class City:
     
     def add_apartment(self, id, num_units = 50):
         for i in range(num_units):
-            self.add_home(id, random.randint(1, 4), random.randint(0, 1))
+            self.add_home(id + str(i), id, random.randint(1, 4), random.randint(0, 1))
 
     def inject_patient_zero(self):
         patients_home = random.choice(self.city['home'])

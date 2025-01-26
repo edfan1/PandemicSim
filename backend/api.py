@@ -21,7 +21,8 @@ async def run_simulation(building_types: Dict[str, List[Building]]):
             for building in buildings:
                 city.construct_building(building_type, building.building_id)
     # Return the simulation results
-    # city.inject_patient_zero()
+    for i in range(20):
+        city.inject_patient_zero()
     return "hello"
 
 @router.post("/tick", response_model=List[BuildingCounts])

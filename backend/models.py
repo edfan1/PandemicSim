@@ -5,8 +5,7 @@ from typing import List, Dict
 class Building(BaseModel):
     name: str
     building_id: str
-    types: List[str]
-
+    
 class BuildingCounts(BaseModel):
     building_id: str
     S: int
