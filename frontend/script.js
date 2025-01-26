@@ -27,15 +27,10 @@ async function initMap() {
         mapTypeControl: false,
     });
     drawBoundingBox();
-<<<<<<< HEAD
-=======
-    drawCircles(100, 100, 100, center);
-
     google.maps.event.addListenerOnce(map, 'bounds_changed', function() {
         map.setZoom(14.85);  // Adjust zoom here after bounds are set
     });
 
->>>>>>> becaddacfa7832b11b8d2a2636ef6a847b6bb019
     initializeSIRGraph();
     findNearby();
 }
