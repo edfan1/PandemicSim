@@ -22,8 +22,22 @@ async def run_simulation(building_types: Dict[str, List[Building]]):
                 city.construct_building(building_type, building.building_id)
     # Return the simulation results
     # run_test_sim(city)
-    city.inject_patient_zero()
+    for i in range(8):
+        city.inject_patient_zero()
     return "hello"
+
+@router.post("/activate", response_model=str)
+async def activate(protocol: Protocol):
+    activate = protocol.protocol
+    if activate == 'mask':
+        city.update_mask_mandate()
+    elif activate == 'school':
+        city.update_schools()
+    elif activate == 'work':
+        city.update_workplaces()
+    elif activate == 'lockdown':
+        city.update_lockdown()
+    return activate
 
 @router.post("/tick", response_model=List[BuildingCounts])
 async def tick():

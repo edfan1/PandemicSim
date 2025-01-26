@@ -18,6 +18,10 @@ class City:
             'home': [],
             'store': [],
         }
+        self.mandate = False
+        self.lockdown = False
+        self.schools_closed = False
+        self.workplaces_closed = False
     
     def reset(self):
         self.clock = datetime(2025, 1, 1, 6, 0, 0)
@@ -114,3 +118,22 @@ class City:
         patients_home.sus -= 1
         patients_home.inf += 1
         patients_home.occupants[0].status = 'I'
+
+    def update_mask_mandate(self):     
+        self.mandate = not self.mandate
+        for buildings in self.city.values():
+            for building in buildings:
+                if building.type != 'home':
+                    if self.mandate:
+                        building.infection_rate = building.infection_rate * 0.5
+                    else: 
+                        building.infection_rate = building.infection_rate / 0.5
+
+    def update_schools(self):
+        self.schools_closed = not self.schools_closed
+
+    def update_workplaces(self):
+        self.workplaces_closed = not self.workplaces_closed
+
+    def update_lockdown(self):
+        self.lockdown = not self.lockdown

@@ -5,9 +5,12 @@ from typing import List, Dict
 class Building(BaseModel):
     name: str
     building_id: str
-    
+
 class BuildingCounts(BaseModel):
     building_id: str
     S: int
     I: int
     R: int
+
+class Protocol(BaseModel):
+    protocol: str
