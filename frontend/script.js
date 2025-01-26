@@ -58,7 +58,6 @@ async function initMap() {
         });
     });
     console.log("All buildings:", buildings);
-    alert("Map Init!");
 }
 
 function startSimulation() {
