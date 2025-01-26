@@ -1,10 +1,12 @@
 let map;
-let hospitals = [];
-let restaurants = [];
-let schools = [];
-let offices = [];
-let stores = [];
-let homes = [];
+let buildings = {
+    "hospital": [],
+    "restaurant": [],
+    "school": [],
+    "office": [],
+    "store": [],
+    "home": []
+};
 let hospitalMarkers = new Map(); // Store unique hospitals by place_id
 
 async function initMap() {

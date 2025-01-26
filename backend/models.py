@@ -1,8 +1,8 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Dict
 
 # Define a Pydantic model for incoming building data
 class Building(BaseModel):
     name: str
-    id: str
+    building_id: str
     types: List[str]

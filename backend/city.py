@@ -38,7 +38,14 @@ class City:
                 counts['infected'] += building.inf
                 counts['recovered'] += building.rec
         return counts
-            
+
+    def get_building_counts(self):
+        counts = []
+        for buildings in self.city.values():
+            for building in buildings:
+                counts.append({'id': building.id, 'S': building.sus, 'I': building.inf, 'R': building.rec})
+        return counts
+
     def get_workplace(self, person):
         workplace = random.choice(self.city[random.choice(workplaces)])
         while not workplace.add_employee(person):
