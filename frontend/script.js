@@ -85,36 +85,35 @@ let secondsElapsed = 0;
 let timerInterval;
 
 function startSimulation() {
-    if (buildings.length === 0) {
+    if (Object.keys(buildings).length === 0) {
         alert("No building data available!");
         return;
     }
 
-        // Collapse the controls when simulation starts
-        const controls = document.getElementById("controls");
-        const chartContainer = document.getElementById("sirGraphContainer");
-        const timerDisplay = document.getElementById("timer");
+    // Get elements
+    const controls = document.getElementById("controls");
+    const chartContainer = document.getElementById("sirGraphContainer");
+    const timerDisplay = document.getElementById("timer");
+    const stopButton = document.getElementById("stopbtn");
 
-    
-        if (!controls.classList.contains("collapsed")) {
-            controls.classList.add("collapsed");
-            chartContainer.style.display = "block";  // Show chart when collapsed
-            document.getElementById("toggleControls").textContent = "+";
-        }
+    // Collapse controls and show necessary elements
+    if (!controls.classList.contains("collapsed")) {
+        controls.classList.add("collapsed");
+        chartContainer.style.display = "block";  // Show chart when collapsed
+        timerDisplay.style.display = "block";  // Show timer
+        stopButton.style.display = "block";  // Show stop button
+        document.getElementById("toggleControls").textContent = "+";
+    }
 
-            // Reset and start timer
+    // Reset and start timer
     secondsElapsed = 0;
     updateTimerDisplay();
-    timerDisplay.style.display = "block";  // Show timer
     clearInterval(timerInterval);
     timerInterval = setInterval(updateTimer, 1000);
 
-
     fetch('http://[::]:8000/run-simulation', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(buildings)
     })
     .then(response => response.json())
@@ -122,11 +121,12 @@ function startSimulation() {
         console.log("Simulation result:", data);
     })
     .catch(error => console.error("Error running simulation:", error));
+    
     tickInterval = setInterval(tick, 100);
 }
-
 function stopTick() {
     clearInterval(tickInterval);
+    
 }
 
 function tick() {
@@ -142,6 +142,20 @@ function tick() {
         updateSIRGraph(data);
     })
     .catch(error => console.error("Error running simulation:", error));
+}
+
+function stopSimulation() {
+    const stopButton = document.getElementById("stopbtn");
+
+    if (stopButton.textContent === "Stop Simulation") {
+        clearInterval(tickInterval);
+        stopTimer();
+        stopButton.textContent = "Resume Simulation";
+    } else {
+        tickInterval = setInterval(tick, 100);
+        timerInterval = setInterval(updateTimer, 1000);
+        stopButton.textContent = "Stop Simulation";
+    }
 }
 
 function initializeSIRGraph() {
@@ -482,6 +496,6 @@ document.getElementById("lockdown").addEventListener("change", handleLockdown);
 
 // Load Google Maps API with Places and Geometry libraries
 const script = document.createElement('script');
-script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY }&libraries=places,geometry&loading=async&callback=initMap`;
+script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places,geometry&loading=async&callback=initMap`;
 script.async = true;
 document.head.appendChild(script);
