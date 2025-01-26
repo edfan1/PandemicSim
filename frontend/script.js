@@ -144,10 +144,7 @@ function tick() {
     .then(data => {
         console.log("Simulation result:", data);
         updateSIRGraph(data);
-<<<<<<< HEAD
         updateDotsGraph(data);
-=======
->>>>>>> e37a4a74a742e58d34529620e1cc7b42414043ce
     })
     .catch(error => console.error("Error running simulation:", error));
 }
