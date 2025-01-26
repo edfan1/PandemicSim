@@ -27,8 +27,6 @@ async function initMap() {
         mapTypeControl: false,
     });
     drawBoundingBox();
-    drawCircles(100, 100, 100, center);
-
     google.maps.event.addListenerOnce(map, 'bounds_changed', function() {
         map.setZoom(14.85);  // Adjust zoom here after bounds are set
     });
@@ -121,7 +119,7 @@ function startSimulation() {
     clearInterval(dayTimerInterval);
     dayTimerInterval = setInterval(updateDayTimer, 2000);
 
-    fetch('http://[::]:8000/run-simulation', {
+    fetch(`${BACKEND_URL}/run-simulation`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(buildings)
@@ -140,7 +138,7 @@ function stopTick() {
 }
 
 function tick() {
-    fetch('http://[::]:8000/tick', {
+    fetch(`${BACKEND_URL}/tick`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -588,7 +586,7 @@ document.getElementById("toggleControls").addEventListener("click", function() {
 // handler (user-input) functions (empty for now - to add backend updates)
 
 function handleMaskMandate() {
-    fetch('http://[::]:8000/activate', {
+    fetch(`${BACKEND_URL}/activate`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -603,7 +601,7 @@ function handleMaskMandate() {
 }
 
 function handleSchoolsClosed() {
-    fetch('http://[::]:8000/activate', {
+    fetch(`${BACKEND_URL}/activate`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -618,7 +616,7 @@ function handleSchoolsClosed() {
 }
 
 function handleWorkFromHome() {
-    fetch('http://[::]:8000/activate', {
+    fetch(`${BACKEND_URL}/activate`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -633,7 +631,7 @@ function handleWorkFromHome() {
 }
 
 function handleLockdown() {
-    fetch('http://[::]:8000/activate', {
+    fetch(`${BACKEND_URL}/activate`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -648,7 +646,7 @@ function handleLockdown() {
 }
 
 function handleHospitalize() {
-    fetch('http://[::]:8000/activate', {
+    fetch(`${BACKEND_URL}/activate`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -676,3 +674,4 @@ const script = document.createElement('script');
 script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places,geometry&loading=async&callback=initMap`;
 script.async = true;
 document.head.appendChild(script);
+const BACKEND_URL = "https://pandemicsim.onrender.com";
