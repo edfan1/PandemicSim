@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Google Maps with Inputs</title>
@@ -11,24 +12,24 @@
     <div id="controls">
         <span id="toggleControls">−</span>
         <label>
-            Enter Location:
-            <input type="text" id="locationInput" placeholder="Enter address">
+            Location:
+            <input type="text" id="locationInput" placeholder="Enter central address">
         </label>
         <button onclick="updateLocation()">Set Location</button>
         <div style="height: 15px;"></div>
         <label>
             Vertical Distance (km):
-            <input type="number" id="verticalDistance" min="0" step="0.1" placeholder="Enter km" value="3">
+            <input type="number" id="verticalDistance" min="0" step="0.1" placeholder="Enter distance (km)" value="3">
         </label>
         <label>
             Horizontal Distance (km):
-            <input type="number" id="horizontalDistance" min="0" step="0.1" placeholder="Enter km" value ="3">
+            <input type="number" id="horizontalDistance" min="0" step="0.1" placeholder="Enter distance (km)" value ="3">
         </label>
-        <button onclick="drawBoundingBox()">Set City Bounds</button>
+        <button onclick="drawBoundingBox()">Set Bounds</button>
         <div style="height: 15px;"></div>
         <h3>Simulation</h3>
 <label>
-    City Population:
+    Population:
     <input type="number" id="cityPopulation" min="1" placeholder="Enter population">
 </label>
 <label>
@@ -38,7 +39,7 @@
 <button onclick="startSimulation();">Start Simulation</button>
 <div style="height: 15px;"></div>
 
-        <h3>City Statistics</h3>
+        <h3>Active Protocols</h3>
         <label>
             <input type="checkbox" id="maskMandate"> Mask Mandate
         </label>
@@ -46,7 +47,7 @@
             <input type="checkbox" id="schoolsClosed"> Schools Closed
         </label>
         <label>
-            <input type="checkbox" id="workFromHome"> Work from Home
+            <input type="checkbox" id="workFromHome"> Work-from-Home
         </label>
         <label>
             <input type="checkbox" id="lockdown"> Lockdown
