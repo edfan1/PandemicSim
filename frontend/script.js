@@ -335,19 +335,30 @@ function getAllPlaces(service, request, type, resultsArray = []) {
         searchNearbyPlaces(bounds);
 
     }
+
     
     document.getElementById("toggleControls").addEventListener("click", function() {
         const controls = document.getElementById("controls");
+        const chartContainer = document.getElementById("sirGraphContainer");
+    
         controls.classList.toggle("collapsed");
-        
+    
+        // Toggle chart visibility based on controls state
+        if (controls.classList.contains("collapsed")) {
+            chartContainer.style.display = "block";
+        } else {
+            chartContainer.style.display = "none";
+        }
+    
         // Toggle between '+' and '-' symbols
         this.textContent = controls.classList.contains("collapsed") ? '+' : '−';
     });
     
-    function isControlsCollapsed() {
-        const controls = document.getElementById("controls");
-        return controls.classList.contains("collapsed");
-    }
+    // Ensure chart is hidden initially
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("sirGraphContainer").style.display = "none";
+    });
+    
 
 
     async function fetchSimulationData() {
