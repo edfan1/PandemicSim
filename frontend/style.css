@@ -113,10 +113,6 @@ html, body {
     display: none;  /* Hide by default */
 }
 
-#controls.collapsed + #sirGraphContainer {
-    display: block; /* Show when controls are collapsed */
-}
-
 #timer {
     display: none;  /* Initially hidden */
     position: absolute;
@@ -134,6 +130,24 @@ html, body {
     line-height: 40px;  /* Center text vertically */
 }
 
+#statisticsBox {
+    position: absolute;
+    bottom: 340px; /* Adjust as needed to position below the chart */
+    right: 20px;
+    width: 200px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    color: black;
+    text-align: left;
+}
+
+#controls.collapsed + #sirGraphContainer + #timer + #stopbtn + #statisticsBox {
+    display: block;
+}
 
 #stopbtn {
     display: none; /* Hide initially */
@@ -152,9 +166,4 @@ html, body {
 
 #stopbtn:hover {
     background-color: darkred;
-}
-
-/* Show stop button only when controls are collapsed */
-#controls.collapsed + #sirGraphContainer + #timer + #stopbtn {
-    display: block;
 }
