@@ -140,7 +140,6 @@ function tick() {
     .then(data => {
         console.log("Simulation result:", data);
         updateSIRGraph(data);
-        
     })
     .catch(error => console.error("Error running simulation:", error));
 }
@@ -414,38 +413,66 @@ document.getElementById("toggleControls").addEventListener("click", function() {
 
 // handler (user-input) functions (empty for now - to add backend updates)
 
-function handleCityPopulation() {
-    const cityPopulation = parseInt(document.getElementById("cityPopulation").value, 10);
-    console.log("City Population:", cityPopulation);
-}
-
-function handleInfectionRate() {
-    const infectionRate = parseFloat(document.getElementById("infectionRate").value);
-    console.log("Infection Rate:", infectionRate);
-}
-
 function handleMaskMandate() {
-    const maskMandate = document.getElementById("maskMandate").checked;
-    console.log("Mask Mandate:", maskMandate);
+    fetch('http://[::]:8000/activate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({protocol: "mask"})
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Protocol updated:", data);
+    })
+    .catch(error => console.error("Error running simulation:", error));
 }
 
 function handleSchoolsClosed() {
-    const schoolsClosed = document.getElementById("schoolsClosed").checked;
-    console.log("Schools Closed:", schoolsClosed);
+    fetch('http://[::]:8000/activate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({protocol: "school"})
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Protocol updated:", data);
+    })
+    .catch(error => console.error("Error running simulation:", error));
 }
 
 function handleWorkFromHome() {
-    const workFromHome = document.getElementById("workFromHome").checked;
-    console.log("Work From Home:", workFromHome);
+    fetch('http://[::]:8000/activate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({protocol: "work"})
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Protocol updated:", data);
+    })
+    .catch(error => console.error("Error running simulation:", error));
 }
 
 function handleLockdown() {
-    const lockdown = document.getElementById("lockdown").checked;
-    console.log("Lockdown:", lockdown);
+    fetch('http://[::]:8000/activate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({protocol: "lockdown"})
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Protocol updated:", data);
+    })
+    .catch(error => console.error("Error running simulation:", error));
 }
 
-document.getElementById("cityPopulation").addEventListener("input", handleCityPopulation);
-document.getElementById("infectionRate").addEventListener("input", handleInfectionRate);
 document.getElementById("maskMandate").addEventListener("change", handleMaskMandate);
 document.getElementById("schoolsClosed").addEventListener("change", handleSchoolsClosed);
 document.getElementById("workFromHome").addEventListener("change", handleWorkFromHome);
