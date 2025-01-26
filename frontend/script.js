@@ -78,6 +78,7 @@ function startSimulation() {
         console.log("Simulation result:", data);
     })
     .catch(error => console.error("Error running simulation:", error));
+    initializeSIRGraph();
 }
 
 function findHospitals() {
@@ -350,85 +351,84 @@ function getAllPlaces(service, request, type, resultsArray = []) {
         return controls.classList.contains("collapsed");
     }
 
-
-    async function fetchSimulationData() {
-
-        if (!isControlsCollapsed) {
-            const controls = document.getElementById("controls");
-            controls.classList.toggle("collapsed");
-        }
-    
-        try {
-            const response = await fetch('http://[::]:8000/tick', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            const data = await response.json();
-            plotSIRGraph(data);
-        } catch (error) {
-            console.error("Error fetching simulation data:", error);
-        }
+async function fetchSimulationData() {
+    if (!isControlsCollapsed) {
+        const controls = document.getElementById("controls");
+        controls.classList.toggle("collapsed");
     }
-    
-    function plotSIRGraph(data) {
-        const ctx = document.getElementById('sirGraph').getContext('2d');
-        
-        // Extract S, I, R data from building counts
-        let time = data.time;
-        let S = 0, I = 0, R = 0;
-        
-        data.building_counts.forEach(building => {
-            S += building.sus;
-            I += building.inf;
-            R += building.rec;
-        });
-    
-        if (window.sirChart) {
-            window.sirChart.data.labels.push(time);
-            window.sirChart.data.datasets[0].data.push(S);
-            window.sirChart.data.datasets[1].data.push(I);
-            window.sirChart.data.datasets[2].data.push(R);
-            window.sirChart.update();
-        } else {
-            window.sirChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: [time],
-                    datasets: [
-                        {
-                            label: 'Susceptible',
-                            data: [S],
-                            borderColor: 'yellow',
-                            fill: false
-                        },
-                        {
-                            label: 'Infected',
-                            data: [I],
-                            borderColor: 'red',
-                            fill: false
-                        },
-                        {
-                            label: 'Recovered',
-                            data: [R],
-                            borderColor: 'blue',
-                            fill: false
-                        }
-                    ]
+    fetch('http://[::]:8000/tick', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Simulation data:', data);
+        updateSIRGraph(data);
+    })
+    .catch(error => console.error("Error running simulation:", error));
+}
+
+function initializeSIRGraph() {
+    const ctx = document.getElementById('sirGraph').getContext('2d');
+    window.sirChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: 'Susceptible',
+                    data: [],
+                    borderColor: 'yellow',
+                    fill: false
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { title: { display: true, text: 'Time (days)' } },
-                        y: { title: { display: true, text: 'People' } }
-                    }
+                {
+                    label: 'Infected',
+                    data: [],
+                    borderColor: 'red',
+                    fill: false
+                },
+                {
+                    label: 'Recovered',
+                    data: [],
+                    borderColor: 'blue',
+                    fill: false
                 }
-            });
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { title: { display: true, text: 'Time (hours)' } },
+                y: { title: { display: true, text: 'People' } }
+            }
         }
+    });
+}
+
+function updateSIRGraph(data) {
+    const time = data.time;
+    let S = 0, I = 0, R = 0;
+
+    data.building_counts.forEach(building => {
+        S += building.S;
+        I += building.I;
+        R += building.R;
+    });
+
+    if (window.sirChart) {
+        window.sirChart.data.labels.push(time);
+        window.sirChart.data.datasets[0].data.push(S);
+        window.sirChart.data.datasets[1].data.push(I);
+        window.sirChart.data.datasets[2].data.push(R);
+        window.sirChart.update();
     }
-    
-    // Call fetchSimulationData every 5 seconds to update the graph
-    setInterval(fetchSimulationData, 5000);
+}
+
+// Call fetchSimulationData every 5 seconds to update the graph
+setInterval(fetchSimulationData, 5000);
 
 // handler (user-input) functions (empty for now - to add backend updates)
 
