@@ -17,11 +17,15 @@ async function initMap() {
         zoom: 15,
         center: center,
         mapId: "e442d3b4191ab219",
+        disableDefaultUI: false, // Set to true to remove all controls
+        zoomControl: false,      // Remove zoom buttons (+, -)
+        fullscreenControl: false, // Remove fullscreen button
+        streetViewControl: false, // Remove Pegman (Street View control)
+        mapTypeControl: false,
     });
     drawBoundingBox();
     initializeSIRGraph();
     findNearby();
-    alert("Map Init!");
 }
 
 function findNearby() {
@@ -316,6 +320,24 @@ function drawBoundingBox() {
     });
     map.fitBounds(bounds);
 }    
+
+document.getElementById("toggleControls").addEventListener("click", function() {
+    const controls = document.getElementById("controls");
+    const chartContainer = document.getElementById("sirGraphContainer");
+    const timer = document.getElementById("timer");
+   
+    if (controls.classList.contains("collapsed")) {
+        controls.classList.remove("collapsed");
+        chartContainer.style.display = "none";
+        timer.style.display = "none";
+        this.textContent = "−";
+    } else {
+        controls.classList.add("collapsed");
+        chartContainer.style.display = "block";
+        timer.style.display = "block";
+        this.textContent = "+";
+    }
+});
 
 // handler (user-input) functions (empty for now - to add backend updates)
 
