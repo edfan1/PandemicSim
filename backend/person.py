@@ -25,7 +25,8 @@ class Person:
     
     def sick(self):
         self.infected_time += (1.0/24.0)
-        if (self.infected_time >= 12.0):
+        if (self.infected_time >= 14.0):
+            self.infected_time = 0.0
             self.status = 'R'
 
     def __str__(self):

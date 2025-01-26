@@ -29,15 +29,18 @@ async def run_simulation(building_types: Dict[str, List[Building]]):
 @router.post("/activate", response_model=str)
 async def activate(protocol: Protocol):
     activate = protocol.protocol
+    boolean = False
     if activate == 'mask':
-        city.update_mask_mandate()
+        boolean = city.update_mask_mandate()
     elif activate == 'school':
-        city.update_schools()
+        boolean = city.update_schools()
     elif activate == 'work':
-        city.update_workplaces()
+        boolean = city.update_workplaces()
     elif activate == 'lockdown':
-        city.update_lockdown()
-    return activate
+        boolean = city.update_lockdown()
+    elif activate == 'hospital':
+        boolean = city.update_hospitalize()
+    return str(boolean)
 
 @router.post("/tick", response_model=List[BuildingCounts])
 async def tick():

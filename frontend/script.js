@@ -27,6 +27,15 @@ async function initMap() {
         mapTypeControl: false,
     });
     drawBoundingBox();
+<<<<<<< HEAD
+=======
+    drawCircles(100, 100, 100, center);
+
+    google.maps.event.addListenerOnce(map, 'bounds_changed', function() {
+        map.setZoom(14.85);  // Adjust zoom here after bounds are set
+    });
+
+>>>>>>> becaddacfa7832b11b8d2a2636ef6a847b6bb019
     initializeSIRGraph();
     findNearby();
 }
@@ -641,10 +650,27 @@ function handleLockdown() {
     .catch(error => console.error("Error running simulation:", error));
 }
 
+function handleHospitalize() {
+    fetch('http://[::]:8000/activate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({protocol: "hospital"})
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Protocol updated:", data);
+    })
+    .catch(error => console.error("Error running simulation:", error));
+}
+
 document.getElementById("maskMandate").addEventListener("change", handleMaskMandate);
 document.getElementById("schoolsClosed").addEventListener("change", handleSchoolsClosed);
 document.getElementById("workFromHome").addEventListener("change", handleWorkFromHome);
 document.getElementById("lockdown").addEventListener("change", handleLockdown);
+document.getElementById("hospital").addEventListener("change", handleHospitalize);
+
 
 
 
