@@ -17,11 +17,15 @@ async function initMap() {
         zoom: 15,
         center: center,
         mapId: "e442d3b4191ab219",
+        disableDefaultUI: false, // Set to true to remove all controls
+        zoomControl: false,      // Remove zoom buttons (+, -)
+        fullscreenControl: false, // Remove fullscreen button
+        streetViewControl: false, // Remove Pegman (Street View control)
+        mapTypeControl: false,
     });
     drawBoundingBox();
     initializeSIRGraph();
     findNearby();
-    alert("Map Init!");
 }
 
 const indexedPlaces = new Set();
@@ -75,11 +79,35 @@ function getAllPlaces(service, request, type, resultsArray = []) {
     });
 }
 
+let secondsElapsed = 0;
+let timerInterval;
+
 function startSimulation() {
     if (buildings.length === 0) {
         alert("No building data available!");
         return;
     }
+
+        // Collapse the controls when simulation starts
+        const controls = document.getElementById("controls");
+        const chartContainer = document.getElementById("sirGraphContainer");
+        const timerDisplay = document.getElementById("timer");
+
+    
+        if (!controls.classList.contains("collapsed")) {
+            controls.classList.add("collapsed");
+            chartContainer.style.display = "block";  // Show chart when collapsed
+            document.getElementById("toggleControls").textContent = "+";
+        }
+
+            // Reset and start timer
+    secondsElapsed = 0;
+    updateTimerDisplay();
+    timerDisplay.style.display = "block";  // Show timer
+    clearInterval(timerInterval);
+    timerInterval = setInterval(updateTimer, 1000);
+
+
     fetch('http://[::]:8000/run-simulation', {
         method: 'POST',
         headers: {
@@ -168,6 +196,25 @@ function updateSIRGraph(data) {
         window.sirChart.data.datasets[2].data.push(R);
         window.sirChart.update();
     }
+}
+
+
+// Stop timer when needed (e.g., simulation ends)
+function stopTimer() {
+    clearInterval(timerInterval);
+}
+
+// Timer functions
+function updateTimer() {
+    secondsElapsed++;
+    updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+    const minutes = Math.floor(secondsElapsed / 60);
+    const seconds = secondsElapsed % 60;
+    document.getElementById("timer").textContent =
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
 function findHospitals() {
@@ -286,6 +333,24 @@ function drawBoundingBox() {
     });
     map.fitBounds(bounds);
 }    
+
+document.getElementById("toggleControls").addEventListener("click", function() {
+    const controls = document.getElementById("controls");
+    const chartContainer = document.getElementById("sirGraphContainer");
+    const timer = document.getElementById("timer");
+   
+    if (controls.classList.contains("collapsed")) {
+        controls.classList.remove("collapsed");
+        chartContainer.style.display = "none";
+        timer.style.display = "none";
+        this.textContent = "−";
+    } else {
+        controls.classList.add("collapsed");
+        chartContainer.style.display = "block";
+        timer.style.display = "block";
+        this.textContent = "+";
+    }
+});
 
 // handler (user-input) functions (empty for now - to add backend updates)
 

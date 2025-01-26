@@ -72,10 +72,10 @@ html, body {
 }
 
 #controls.collapsed {
-    padding-top: 30px; /* Prevent overlap of the toggle button */
+    padding-top: 20px; 
     height: 20px;
     overflow: hidden;
-}
+} 
 
 #controls.collapsed *:not(#toggleControls) {
     display: none;
@@ -86,7 +86,7 @@ html, body {
     position: fixed;
     top: 5px;  /* Adjust to move up if needed */
     left: 5px;   /* Adjust to move left if needed */
-    width: 190px;  /* Adjust the size as needed */
+    width: 200px;  /* Adjust the size as needed */
     height: auto;  /* Maintain aspect ratio */
     z-index: 1000; /* Ensure it appears on top of other elements */
 }
@@ -109,4 +109,26 @@ html, body {
 
 #controls.collapsed + #sirGraphContainer {
     display: block; /* Show when controls are collapsed */
+}
+
+#timer {
+    display: none;  /* Initially hidden */
+    position: absolute;
+    top: calc(20px + 50px); /* Position it below the collapsed control */
+    right: 20px;
+    width: 100px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    font-size: 16px;
+    font-weight: bold;
+    color: black;
+    text-align: center;
+    line-height: 40px;  /* Center text vertically */
+}
+
+/* Show timer only when controls are collapsed */
+#controls.collapsed + #timer {
+    display: block;
 }
