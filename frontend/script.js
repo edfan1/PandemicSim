@@ -674,4 +674,4 @@ const script = document.createElement('script');
 script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places,geometry&loading=async&callback=initMap`;
 script.async = true;
 document.head.appendChild(script);
-const BACKEND_URL = "https://PandemicSim.onrender.com";
+const BACKEND_URL = "https://pandemicsim.onrender.com";
