@@ -1,7 +1,7 @@
 import random
 
 def hospital_update_fn(building, time, city):
-    if time == 0 or time == 12:
+    if building.closed and (time == 0 or time == 12):
         i = 0
         while i < building.size:
             person = building.occupants[i]

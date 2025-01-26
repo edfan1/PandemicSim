@@ -1,5 +1,5 @@
 def school_update_fn(building, time, city):
-    if time == 15 or time == 17:
+    if not building.closed and (time == 15 or time == 17):
         i = 0
         while i < building.size:
             person = building.occupants[i]

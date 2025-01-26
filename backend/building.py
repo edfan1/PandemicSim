@@ -12,6 +12,7 @@ class Building:
         self.occupants = []
         self.employees = []
         self.id = id
+        self.closed = False
     
     def add_employee(self, person):
         if len(self.employees) == self.max_employees:
