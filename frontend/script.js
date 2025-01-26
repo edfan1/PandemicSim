@@ -30,7 +30,7 @@ async function initMap() {
     findNearby();
 }
 
-const indexedPlaces = new Set();
+const indexedPlaces = new Map();
 
 function findNearby() {
     indexedPlaces.clear();
@@ -54,7 +54,7 @@ function getAllPlaces(service, request, type, resultsArray = []) {
         if (status === google.maps.places.PlacesServiceStatus.OK) {
             results.forEach(place => {
                 if (!place.types.includes('doctor') && !indexedPlaces.has(place.place_id)) {  // Exclude unwanted types
-                    indexedPlaces.add(place.place_id);
+                    indexedPlaces.set(place.place_id, {lng : place.geometry.location.lng(), lat : place.geometry.location.lat()});
                     resultsArray.push({
                         name: place.name,
                         building_id: place.place_id,
@@ -140,6 +140,7 @@ function tick() {
     .then(data => {
         console.log("Simulation result:", data);
         updateSIRGraph(data);
+        
     })
     .catch(error => console.error("Error running simulation:", error));
 }
@@ -453,7 +454,6 @@ document.getElementById("lockdown").addEventListener("change", handleLockdown);
 
 
 // Load Google Maps API with Places and Geometry libraries
-const GOOGLE_MAPS_API_KEY = "AIzaSyDc1RJKVZuU0tqeZcW4q558ltBa7W857fA";
 const script = document.createElement('script');
 script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY }&libraries=places,geometry&loading=async&callback=initMap`;
 script.async = true;
