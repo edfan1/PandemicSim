@@ -59,3 +59,46 @@ html, body {
 #controls button:hover {
     background: #0056b3;
 }
+
+#toggleControls {
+    position: absolute;
+    top: 5px;
+    right: 12px;
+    font-size: 22px;
+    font-weight: bold;
+    color: black;
+    cursor: pointer;
+    user-select: none;
+}
+
+#controls.collapsed {
+    padding-top: 30px; /* Prevent overlap of the toggle button */
+    height: 20px;
+    overflow: hidden;
+}
+
+#controls.collapsed *:not(#toggleControls) {
+    display: none;
+}
+
+
+#cornerImage {
+    position: fixed;
+    top: 5px;  /* Adjust to move up if needed */
+    left: 5px;   /* Adjust to move left if needed */
+    width: 190px;  /* Adjust the size as needed */
+    height: auto;  /* Maintain aspect ratio */
+    z-index: 1000; /* Ensure it appears on top of other elements */
+}
+
+#sirGraphContainer {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 400px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    padding: 10px;
+}
