@@ -1,7 +1,7 @@
 import random
 
 def store_update_fn(building, time, city):
-    if time >= 10 or time <= 20:
+    if not building.closed and (time >= 10 or time <= 20):
         i = 0
         while i < building.size:
             person = building.occupants[i]
