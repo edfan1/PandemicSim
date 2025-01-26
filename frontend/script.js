@@ -11,6 +11,7 @@ let hospitalMarkers = new Map(); // Store unique hospitals by place_id
 let bounds = null;
 let tickInterval = null;
 let allCircles = [];
+let tickCounter = 0;
 
 async function initMap() {
     const center = { lat: 39.952305, lng: -75.193703 }; // Philadelphia
@@ -149,7 +150,14 @@ function tick() {
     .then(data => {
         console.log("Simulation result:", data);
         updateSIRGraph(data);
-        updateDotsGraph(data);
+        
+        tickCounter++;
+        
+        if (tickCounter % 4 === 0) {
+            clearCircles();
+            updateDotsGraph(data);
+        }
+
     })
     .catch(error => console.error("Error running simulation:", error));
 }
@@ -320,7 +328,7 @@ function updateDotsGraph(data) {
             console.log("building not indexed!");
         }
         drawCircles(building["S"], building["I"], building["R"], location);
-        drawStayAtHomers(building["S"]/50, building["I"]/50, building["R"]/50, bounds);
+        drawStayAtHomers(building["S"]/20, building["I"]/20, building["R"]/20, bounds);
     });
 }
 
@@ -456,13 +464,13 @@ function drawCircles(susceptible, infected, recovered, location) {
     function createCircle(lat, lng, color) {
         const circle = new google.maps.Circle({
             strokeColor: color,
-            strokeOpacity: 0.8,
+            strokeOpacity: 1,
             strokeWeight: 2,
             fillColor: color,
-            fillOpacity: 0.6,
+            fillOpacity: 0.8,
             map: map,
             center: { lat: lat, lng: lng },
-            radius: 1 // Radius in meters, adjust as needed
+            radius: 2 // Radius in meters, adjust as needed
         });
         allCircles.push(circle);
     }
@@ -500,7 +508,7 @@ function drawCircles(susceptible, infected, recovered, location) {
     // Add circles for susceptible (yellow)
     for (let i = 0; i < susceptible; i++) {
         const { latOffset, lngOffset } = generateGaussianOffset(maxDistance);
-        createCircle(centerLat + latOffset, centerLng + lngOffset, "#FFFF00");
+        createCircle(centerLat + latOffset, centerLng + lngOffset, "#ffb200");
     }
 
     // Add circles for recovered (blue)
@@ -529,13 +537,13 @@ function drawStayAtHomers(susceptible, infected, recovered, bounds) {
     function createCircle(lat, lng, color) {
         const circle = new google.maps.Circle({
             strokeColor: color,
-            strokeOpacity: 0.8,
+            strokeOpacity: 1,
             strokeWeight: 2,
             fillColor: color,
-            fillOpacity: 0.6,
+            fillOpacity: 0.8,
             map: map,
             center: { lat: lat, lng: lng },
-            radius: 1 // Radius in meters, adjust as needed
+            radius: 2 // Radius in meters, adjust as needed
         });
         allCircles.push(circle);
     }
@@ -549,7 +557,7 @@ function drawStayAtHomers(susceptible, infected, recovered, bounds) {
     // Add circles for susceptible (yellow)
     for (let i = 0; i < susceptible; i++) {
         const { lat, lng } = getRandomLocation();
-        createCircle(lat, lng, "#FFFF00");
+        createCircle(lat, lng, "#ffb200");
     }
 
     // Add circles for recovered (blue)
