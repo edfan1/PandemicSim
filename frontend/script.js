@@ -647,10 +647,27 @@ function handleLockdown() {
     .catch(error => console.error("Error running simulation:", error));
 }
 
+function handleHospitalize() {
+    fetch('http://[::]:8000/activate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({protocol: "hospital"})
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Protocol updated:", data);
+    })
+    .catch(error => console.error("Error running simulation:", error));
+}
+
 document.getElementById("maskMandate").addEventListener("change", handleMaskMandate);
 document.getElementById("schoolsClosed").addEventListener("change", handleSchoolsClosed);
 document.getElementById("workFromHome").addEventListener("change", handleWorkFromHome);
 document.getElementById("lockdown").addEventListener("change", handleLockdown);
+document.getElementById("hospital").addEventListener("change", handleHospitalize);
+
 
 
 

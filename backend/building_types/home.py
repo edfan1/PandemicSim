@@ -5,7 +5,11 @@ def home_update_fn(building, time, city):
         i = 0
         while i < building.size:
             person = building.occupants[i]
-            if time == 9:
+            if city.hospitalize and person.infected_time >= 7.0:
+                building.remove_occupant(person)
+                city.get_hospital().add_occupant(person)
+                i -= 1
+            elif time == 9:
                 if person.occupation == 'student' and not city.schools_closed:
                     building.remove_occupant(person)
                     person.employer.add_occupant(person)

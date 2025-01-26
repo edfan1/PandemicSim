@@ -22,6 +22,7 @@ class City:
         self.lockdown = False
         self.schools_closed = False
         self.workplaces_closed = False
+        self.hospitalize = False
     
     def reset(self):
         self.clock = datetime(2025, 1, 1, 6, 0, 0)
@@ -37,6 +38,7 @@ class City:
         self.lockdown = False
         self.schools_closed = False
         self.workplaces_closed = False
+        self.hospitalize = False
 
     def update_city(self):
         self.clock += timedelta(hours=1)
@@ -132,12 +134,20 @@ class City:
                         building.infection_rate = building.infection_rate * 0.1
                     else: 
                         building.infection_rate = building.infection_rate / 0.1
+        return self.mandate
 
     def update_schools(self):
         self.schools_closed = not self.schools_closed
+        return self.schools_closed
 
     def update_workplaces(self):
         self.workplaces_closed = not self.workplaces_closed
+        return self.workplaces_closed
 
     def update_lockdown(self):
         self.lockdown = not self.lockdown
+        return self.lockdown
+    
+    def update_hospitalize(self):
+        self.hospitalize = not self.hospitalize
+        return self.hospitalize
