@@ -33,6 +33,10 @@ class City:
             'home': [],
             'store': [],
         }
+        self.mandate = False
+        self.lockdown = False
+        self.schools_closed = False
+        self.workplaces_closed = False
 
     def update_city(self):
         self.clock += timedelta(hours=1)
@@ -125,9 +129,9 @@ class City:
             for building in buildings:
                 if building.type != 'home':
                     if self.mandate:
-                        building.infection_rate = building.infection_rate * 0.5
+                        building.infection_rate = building.infection_rate * 0.1
                     else: 
-                        building.infection_rate = building.infection_rate / 0.5
+                        building.infection_rate = building.infection_rate / 0.1
 
     def update_schools(self):
         self.schools_closed = not self.schools_closed
