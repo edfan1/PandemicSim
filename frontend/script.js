@@ -27,7 +27,6 @@ async function initMap() {
         mapTypeControl: false,
     });
     drawBoundingBox();
-    drawCircles(100, 100, 100, center);
     initializeSIRGraph();
     findNearby();
 }
